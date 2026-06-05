@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --brand-sidebar: #cdd5bf; 
+  --brand-bg: #f8f9f5;      
+  --brand-dark: #2d3322;    
+  --brand-input: #ccd4be;   
+  --brand-card-inner: #f1f3ed; 
+  --brand-note: #5b6647;    
+  --brand-tag: #f7dacb;    
+  
+  --text-main: #1a1a1a;
+  --text-muted: #666666;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--brand-bg);
+  font-family: 'Inter', sans-serif; 
+  color: var(--text-main);
+}
