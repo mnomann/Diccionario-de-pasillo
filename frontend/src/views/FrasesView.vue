@@ -20,16 +20,15 @@
     </header>
 
     <!-- Grilla de Tarjetas -->
-    <div class="frases-grid">
+    <div v-if="store.loading" class="loading-state">Cargando...</div>
+    <div v-else class="frases-grid">
       <article 
-        v-for="frase in frases" 
+        v-for="frase in store.frases" 
         :key="frase.id" 
         :class="['frase-card', frase.type === 'wide' ? 'wide-card' : 'normal-card']"
       >
         
-        <!-- Diseño de Tarjeta Normal -->
         <template v-if="frase.type === 'normal'">
-          <!-- Espacio reservado para la ilustración -->
           <div class="card-image-placeholder">
             <span>Ilustración: {{ frase.word }}</span>
           </div>
@@ -46,7 +45,6 @@
           </div>
         </template>
 
-        <!-- Diseño de Tarjeta Ancha (Ej: Cachai) -->
         <template v-else>
           <div class="wide-content-wrapper">
             <div class="wide-header">
@@ -79,65 +77,15 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { Filter, Plus, Volume2 } from 'lucide-vue-next'
+import { useFrasesStore } from '../store/frases'
 
-// Datos calcados de tu diseño de Figma
-const frases = [
-  { 
-    id: 1, 
-    word: 'Al tiro', 
-    meaning: 'Inmediatamente, enseguida.', 
-    type: 'normal' 
-  },
-  { 
-    id: 2, 
-    word: '¿Cachai?', 
-    meaning: '¿Entiendes? o ¿Comprendes?', 
-    example: '"Es complicado de explicar, ¿cachai?"',
-    tags: ['Expresión', 'Muy Común'],
-    type: 'wide' 
-  },
-  { 
-    id: 3, 
-    word: 'Fome', 
-    meaning: 'Aburrido, sin gracia.', 
-    tags: ['Adjetivo'],
-    type: 'normal' 
-  },
-  { 
-    id: 4, 
-    word: 'Bacan', 
-    meaning: 'Excelente, genial.', 
-    tags: ['Adjetivo'],
-    type: 'normal' 
-  },
-  { 
-    id: 5, 
-    word: 'Cuatico', 
-    meaning: 'Exagerado, intenso, o sorprendente.', 
-    tags: ['Expresión'],
-    type: 'normal' 
-  },
-  { 
-    id: 6, 
-    word: 'Pololo / Polola', 
-    meaning: 'Novio, novia.', 
-    type: 'normal' 
-  },
-  { 
-    id: 7, 
-    word: 'Luca', 
-    meaning: 'Mil pesos chilenos.', 
-    tags: ['Dinero'],
-    type: 'normal' 
-  },
-  { 
-    id: 8, 
-    word: 'Micro', 
-    meaning: 'Autobús de transporte público.', 
-    type: 'normal' 
-  }
-]
+const store = useFrasesStore()
+
+onMounted(() => {
+  store.fetchFrases()
+})
 </script>
 
 <style scoped>

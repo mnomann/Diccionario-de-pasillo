@@ -122,11 +122,19 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { 
   Briefcase, Utensils, Store, User, Play, 
   History, Lightbulb, Bookmark, PlusCircle, 
   ArrowRight, Info, ScanText 
 } from 'lucide-vue-next'
+import { useEscenariosStore } from '../store/escenarios'
+
+const store = useEscenariosStore()
+
+onMounted(() => {
+  store.fetchEscenarios()
+})
 </script>
 
 <style scoped>

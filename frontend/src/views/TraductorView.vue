@@ -26,89 +26,87 @@
     <!-- Barra de búsqueda y botón de traducción -->
     <div class="search-bar-container">
       <div class="search-input-wrapper">
-        <!-- Campo de entrada para la frase a traducir -->
-        <input class="search-input" type="text" placeholder="Ej: Estoy pato" />
+        <input
+          class="search-input"
+          type="text"
+          v-model="store.query"
+          placeholder="Ej: Estoy pato"
+          @keyup.enter="buscar"
+        />
       </div>
-      <!-- Botón para activar la traducción -->
-      <button class="translate-btn">
+      <button class="translate-btn" @click="buscar" :disabled="store.loading">
         <Languages :size="18" />
-        TRADUCIR
+        {{ store.loading ? 'BUSCANDO...' : 'TRADUCIR' }}
       </button>
     </div>
 
-    <!-- Layout principal con resultado y columna lateral de información -->
-    <div class="results-layout">
-      
-      <!-- Tarjeta principal con la información de la frase -->
-      <div class="main-card-white">
-        <!-- Etiqueta indicando que es la frase original -->
-        <span class="card-label">FRASE ORIGINAL</span>
-        <!-- Texto de la frase a traducir -->
-        <h1 class="phrase-text">"Estar pato"</h1>
+    <div v-if="store.loading" class="loading-state">
+      <p>Buscando...</p>
+    </div>
 
-        <!-- Sección de significado literal -->
+    <div v-else-if="store.resultado" class="results-layout">
+      <div class="main-card-white">
+        <span class="card-label">FRASE ORIGINAL</span>
+        <h1 class="phrase-text">"{{ store.resultado.fraseOriginal }}"</h1>
+
         <div class="inner-box">
           <div class="box-header">
             <BookOpen :size="16" />
             <h3>SIGNIFICADO LITERAL</h3>
           </div>
-          <p>Ser un pato (animal).</p>
+          <p>{{ store.resultado.significadoLiteral }}</p>
         </div>
 
-        <!-- Sección de uso común con nota informativa -->
         <div class="inner-box">
           <div class="box-header">
             <MessageSquare :size="16" />
             <h3>USO COMÚN</h3>
           </div>
-          <p>No tener dinero; estar sin fondos financieros en este momento.</p>
-          
-          <!-- Nota oscura con información sobre seguridad de la expresión -->
+          <p>{{ store.resultado.usoComun }}</p>
+
           <div class="dark-note">
             <Info :size="18" class="note-icon" />
-            <p>Nota: Es una expresión informal pero no es ofensiva. Segura para usar con amigos o familia.</p>
+            <p>{{ store.resultado.nota }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Columna lateral con información adicional sobre la frase -->
       <aside class="side-info-column">
-        
-        <!-- Tarjeta del nivel de ironía -->
         <div class="small-card">
           <h3 class="card-title">NIVEL DE IRONÍA</h3>
           <div class="irony-row">
-            <span>Bajo</span>
-            <!-- Indicador visual de barras para el nivel de ironía -->
+            <span>{{ store.resultado.nivelIronia }}</span>
             <div class="irony-bars">
-              <div class="bar active"></div>
-              <div class="bar inactive"></div>
-              <div class="bar inactive"></div>
+              <div class="bar" :class="ironiaClase(1)"></div>
+              <div class="bar" :class="ironiaClase(2)"></div>
+              <div class="bar" :class="ironiaClase(3)"></div>
             </div>
           </div>
         </div>
 
-        <!-- Tarjeta de etiquetas categóricas -->
         <div class="small-card">
           <h3 class="card-title">ETIQUETAS</h3>
           <div class="tags-container">
-            <span class="tag">Informal</span>
-            <span class="tag">Finanzas</span>
-            <span class="tag">Amistad</span>
+            <span v-for="tag in store.resultado.etiquetas" :key="tag" class="tag">{{ tag }}</span>
           </div>
         </div>
 
-        <!-- Tarjeta interactiva para acceder a escenarios sociales -->
-        <div class="small-card link-card">
+        <router-link to="/escenarios" class="small-card link-card" style="text-decoration: none;">
           <div class="link-content">
             <h3 class="card-title">APRENDER ESCENARIOS SOCIALES</h3>
             <p>Ver ejemplos de cómo usar esta frase en la vida real.</p>
           </div>
           <ArrowRight :size="20" />
-        </div>
-
+        </router-link>
       </aside>
+    </div>
 
+    <div v-else-if="store.query && !store.loading" class="no-results">
+      <p>No se encontraron resultados para "{{ store.query }}".</p>
+    </div>
+
+    <div v-else class="empty-state">
+      <p>Introduce una frase chilena para obtener su significado y contexto.</p>
     </div>
   </div>
 </template>
@@ -124,17 +122,22 @@
  */
 import { Languages, BookOpen, MessageSquare, Info, ArrowRight } from 'lucide-vue-next'
 
-/**
- * TraductorView - Componente de vista para traducción de modismos chilenos
- * 
- * Utiliza composition API de Vue 3 con TypeScript.
- * 
- * Funcionalidades futuras a implementar:
- * - Reactive state para guardar la frase introducida y resultados
- * - Métodos para enviar peticiones a la API de traducción
- * - Validación del input del usuario
- * - Manejo de errores en las peticiones HTTP
- */
+import { useTraductorStore } from '../store/traductor'
+
+const store = useTraductorStore()
+
+function buscar() {
+  if (store.query.trim()) {
+    store.traducir(store.query.trim())
+  }
+}
+
+function ironiaClase(barIndex: number): string {
+  if (!store.resultado) return 'inactive'
+  const niveles: Record<string, number> = { Bajo: 1, Medio: 2, Alto: 3 }
+  const nivel = niveles[store.resultado.nivelIronia] || 0
+  return barIndex <= nivel ? 'active' : 'inactive'
+}
 </script>
 
 <style scoped>
@@ -535,5 +538,14 @@ import { Languages, BookOpen, MessageSquare, Info, ArrowRight } from 'lucide-vue
   font-size: 0.8rem;
   color: var(--text-muted);
   margin-top: 0.25rem;
+}
+
+.loading-state,
+.no-results,
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  font-size: 1rem;
 }
 </style>

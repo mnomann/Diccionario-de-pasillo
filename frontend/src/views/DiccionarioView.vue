@@ -26,41 +26,37 @@
     <!-- Barra de búsqueda -->
     <div class="search-wrapper">
       <Search class="search-icon" :size="20" />
-      <input 
-        type="text" 
-        placeholder="Buscar palabra..." 
+      <input
+        type="text"
+        v-model="textoBusqueda"
+        placeholder="Buscar palabra..."
         class="search-input"
+        @keyup.enter="buscar"
       />
     </div>
 
-    <!-- Filtros por categoría: permite filtrar palabras por tema -->
+    <!-- Filtros por categoría -->
     <div class="filters-container">
-      <!-- Botón para cada categoría disponible -->
-      <button 
-        v-for="cat in categorias" 
+      <button
+        v-for="cat in store.categorias"
         :key="cat"
         :class="['filter-btn', { active: categoriaActiva === cat }]"
-        @click="categoriaActiva = cat"
+        @click="filtrar(cat)"
       >
         {{ cat }}
       </button>
     </div>
 
-    <!-- Grid de tarjetas: muestra todas las palabras del diccionario -->
-    <div class="words-grid">
-      <!-- Tarjeta individual para cada palabra -->
-      <article v-for="item in palabras" :key="item.palabra" class="word-card">
-        <!-- Nombre de la palabra en grande -->
+    <!-- Grid de tarjetas -->
+    <div v-if="store.loading" class="loading-state">Cargando...</div>
+    <div v-else class="words-grid">
+      <article v-for="item in store.palabras" :key="item.id" class="word-card">
         <h2 class="word-title">{{ item.palabra }}</h2>
-        
-        <!-- Sección de significado -->
         <div class="section-label">SIGNIFICADO</div>
-        <p class="word-meaning">{{ item.significado }}</p>
-        
-        <!-- Sección de ejemplo de uso -->
-        <div class="example-box">
+        <p class="word-meaning">{{ item.traduccion }}</p>
+        <div v-if="item.ejemplo_uso" class="example-box">
           <div class="section-label">EJEMPLO</div>
-          <p class="word-example">{{ item.ejemplo }}</p>
+          <p class="word-example">{{ item.ejemplo_uso }}</p>
         </div>
       </article>
     </div>
@@ -81,60 +77,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Search, Send } from 'lucide-vue-next'
+import { usePalabrasStore } from '../store/palabras'
 
-/**
- * ESTADO REACTIVO
- */
+const store = usePalabrasStore()
 
-/** Lista de categorías disponibles para filtrar palabras */
-const categorias = ['TODO', 'AMIGOS', 'TRABAJO', 'CALLE', 'COMIDA']
-
-/** Categoría actualmente seleccionada en los filtros */
 const categoriaActiva = ref('TODO')
+const textoBusqueda = ref('')
 
-/**
- * DATOS
- * 
- * Datos simulados (Mock data) con palabras chilenas.
- * Estructura esperada:
- * - palabra: {string} Nombre de la palabra
- * - significado: {string} Definición y contexto
- * - ejemplo: {string} Frase de ejemplo en contexto
- */
-const palabras = [
-  {
-    palabra: 'Cachai',
-    significado: '¿Entiendes? / ¿Comprendes? Proviene del verbo en inglés \'to catch\'.',
-    ejemplo: '"Es complicado el tema, ¿cachai?"'
-  },
-  {
-    palabra: 'Fome',
-    significado: 'Aburrido, sin gracia, que no tiene sentido del humor.',
-    ejemplo: '"La película estaba súper fome, me quedé dormido."'
-  },
-  {
-    palabra: 'Pololo/a',
-    significado: 'Novio o novia. Pareja formal pero antes del compromiso de matrimonio.',
-    ejemplo: '"Voy al cine con mi polola más rato."'
-  },
-  {
-    palabra: 'Pega',
-    significado: 'Trabajo, empleo u ocupación remunerada.',
-    ejemplo: '"Tengo mucha pega hoy, no creo que pueda salir."'
-  },
-  {
-    palabra: 'Al tiro',
-    significado: 'Inmediatamente, de inmediato, en seguida.',
-    ejemplo: '"Voy para allá al tiro, dame 5 minutos."'
-  },
-  {
-    palabra: 'Bacán',
-    significado: 'Excelente, genial, muy bueno. Algo positivo.',
-    ejemplo: '"¡Qué bacán tu chaqueta nueva!"'
-  }
-]
+onMounted(() => {
+  store.fetchPalabras()
+})
+
+function filtrar(cat: string) {
+  categoriaActiva.value = cat
+  store.fetchPalabras({
+    categoria: cat === 'TODO' ? undefined : cat.toLowerCase(),
+    buscar: textoBusqueda.value || undefined,
+  })
+}
+
+function buscar() {
+  store.fetchPalabras({
+    categoria: categoriaActiva.value === 'TODO' ? undefined : categoriaActiva.value.toLowerCase(),
+    buscar: textoBusqueda.value || undefined,
+  })
+}
 </script>
 
 <style scoped>
