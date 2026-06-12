@@ -1,145 +1,164 @@
 <template>
   <div class="escenarios-container">
     
-    <!-- Encabezado con borde lateral -->
     <header class="view-header">
       <h1 class="title">GUÍA DE ESCENARIOS SOCIALES</h1>
-      <p class="subtitle">Navega situaciones cotidianas con calma. Explora interacciones comunes y descubre los significados ocultos tras el lenguaje figurado chileno.</p>
+      <p class="subtitle">Explora situaciones cotidianas separadas por contexto. Toca una categoría para ver sus conversaciones y traducciones.</p>
     </header>
 
-    <!-- Grilla Principal de 3 Columnas -->
-    <div class="escenarios-grid">
+    <div class="categories-wrapper">
       
-      <!-- Fila 1: Entrevista (Ancha) y Amigos (Normal) -->
-      <article class="card wide-card gradient-profesional">
-        <div class="card-badge">PROFESIONAL</div>
-        <div class="profesional-content">
-          <div class="tag-header">
-            <Briefcase :size="16" />
-            <span>ÁREA PROFESIONAL</span>
-          </div>
-          <h2>Entrevista de trabajo</h2>
-          <p>Aprende a decodificar preguntas como "¿Cuál es tu pretensión de sueldo?" o el uso de modismos en entornos formales.</p>
-          <a href="#" class="action-link">Comenzar práctica <ArrowRight :size="16" /></a>
-        </div>
-        <!-- El fondo de la persona se maneja por CSS o imagen absoluta en el futuro -->
-      </article>
-
-      <article class="card normal-card">
-        <div class="image-placeholder dog-placeholder">
-          <div class="icon-badge"><Utensils :size="14" /></div>
-        </div>
-        <div class="card-content">
-          <h3>Junta con amigos</h3>
-          <p>¿Qué significa cuando alguien dice "ya, po"? Navega el caos social de las reuniones grupales.</p>
-        </div>
-      </article>
-
-      <!-- Fila 2: Panadería (Ancha) y Guía (Normal) -->
-      <article class="card wide-card no-padding">
-        <div class="image-placeholder bread-placeholder">
-          <div class="scenario-title-overlay">
-            <Store :size="18" />
-            <h2>Escenario: En la Panadería</h2>
-          </div>
-        </div>
+      <section v-for="categoria in categorias" :key="categoria.id" class="category-section">
         
-        <div class="chat-container">
-          <!-- Mensaje Izquierda (Usuario) -->
-          <div class="chat-row left">
-            <div class="avatar user-avatar"><User :size="16" /></div>
-            <div class="chat-bubble">
-              "Hola vecino, ¿me da una hallulla calientita? ¡Ojalá que no esté dura como palo!"
-            </div>
+        <button 
+          class="category-toggle-btn" 
+          @click="toggleCategoria(categoria.id)"
+          :aria-expanded="categoriasAbiertas.includes(categoria.id)"
+        >
+          <div class="cat-title-left">
+            <component :is="categoria.icono" :size="24" class="cat-icon" />
+            <h2 class="category-name">{{ categoria.nombre }}</h2>
           </div>
           
-          <!-- Mensaje Derecha (Vendedor) -->
-          <div class="chat-row right">
-            <div class="chat-bubble">
-              "¡Al tiro jefe! Están recién salidas. Estas vuelan a esta hora."
+          <ChevronUp v-if="categoriasAbiertas.includes(categoria.id)" :size="20" class="toggle-icon" />
+          <ChevronDown v-else :size="20" class="toggle-icon" />
+        </button>
+
+        <div class="scenarios-list" v-show="categoriasAbiertas.includes(categoria.id)">
+          
+          <article v-for="escenario in categoria.escenarios" :key="escenario.id" class="scenario-card">
+            
+            <div class="scenario-image-header" :class="escenario.claseFondo">
+              <div class="header-overlay">
+                <h3>Escenario: {{ escenario.titulo }}</h3>
+              </div>
             </div>
-            <div class="avatar vendor-avatar"><Store :size="16" /></div>
-          </div>
 
-          <!-- Botones de Acción del Chat -->
-          <div class="chat-actions">
-            <button class="chat-btn"><Play :size="14" /> Escuchar Audio</button>
-            <button class="chat-btn"><History :size="14" /> Ver Variaciones</button>
-          </div>
-        </div>
-      </article>
+            <div class="scenario-body">
+              
+              <div class="chat-column">
+                <div 
+                  v-for="(mensaje, index) in escenario.chat" 
+                  :key="index"
+                  :class="['chat-row', mensaje.emisor === 'usuario' ? 'left' : 'right']"
+                >
+                  <div v-if="mensaje.emisor === 'usuario'" class="avatar user-avatar">
+                    <User :size="16" />
+                  </div>
+                  
+                  <div class="chat-bubble">
+                    {{ mensaje.texto }}
+                  </div>
+                  
+                  <div v-if="mensaje.emisor === 'otro'" class="avatar vendor-avatar">
+                    <component :is="escenario.iconoOtro" :size="16" />
+                  </div>
+                </div>
+              </div>
 
-      <article class="card normal-card interpretation-card">
-        <div class="interp-header">
-          <Lightbulb :size="16" />
-          <span>GUÍA DE INTERPRETACIÓN</span>
-        </div>
-        
-        <div class="interp-box">
-          <div class="box-label">
-            <ScanText :size="14" /> LITERAL VS. SOCIAL
-          </div>
-          <h4>"Vuelan a esta hora"</h4>
-          <p>No significa que el pan tenga alas. Significa que se venden muy rápido.</p>
-        </div>
+              <aside class="translation-column">
+                <div class="interp-box">
+                  <div class="box-label">
+                    <Lightbulb :size="14" /> TRADUCCIÓN LITERAL VS SOCIAL
+                  </div>
+                  <h4>Literalmente sonaría a:</h4>
+                  <p class="literal-text">"{{ escenario.traduccion.literal }}"</p>
+                  
+                  <h4 class="mt-3">Pero en realidad significa:</h4>
+                  <p class="real-text">"{{ escenario.traduccion.real }}"</p>
+                </div>
 
-        <div class="interp-box social-suggestion">
-          <div class="box-label">
-            <Info :size="14" /> SUGERENCIA SOCIAL
-          </div>
-          <h4>El uso de "Vecino/Jefe"</h4>
-          <p>Son términos de cercanía casual en Chile. No implican una relación laboral.</p>
-        </div>
-      </article>
+                <div class="interp-box social-note" v-if="escenario.traduccion.nota">
+                  <div class="box-label">
+                    <Info :size="14" /> NOTA DE CONTEXTO
+                  </div>
+                  <p>{{ escenario.traduccion.nota }}</p>
+                </div>
+              </aside>
 
-      <!-- Fila 3: Tarjetas pequeñas de utilidad -->
-      <article class="card small-action-card">
-        <div class="icon-wrapper"><Bookmark :size="20" /></div>
-        <div>
-          <h4>ESCENARIOS SUGERIDOS</h4>
-          <p>Basados en tu historial</p>
-        </div>
-      </article>
+            </div>
+          </article>
 
-      <article class="card small-action-card dashed-border">
-        <div class="new-scenario-content">
-          <h4>¿Tienes un escenario nuevo?</h4>
-          <p>Ayúdanos a expandir la biblioteca.</p>
-          <button class="btn-suggest">SUGERIR ESCENARIO</button>
         </div>
-      </article>
-
-      <article class="card small-action-card disabled-card">
-        <div class="coming-soon-content">
-          <PlusCircle :size="24" class="muted-icon" />
-          <h4>PRÓXIMAMENTE</h4>
-          <p>Realidad Aumentada</p>
-        </div>
-      </article>
+      </section>
 
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { 
-  Briefcase, Utensils, Store, User, Play, 
-  History, Lightbulb, Bookmark, PlusCircle, 
-  ArrowRight, Info, ScanText 
-} from 'lucide-vue-next'
-import { useEscenariosStore } from '../store/escenarios'
+import { ref } from 'vue'
+// Importamos ChevronUp y ChevronDown para las flechitas
+import { Store, User, Users, Lightbulb, Info, Utensils, ChevronDown, ChevronUp } from 'lucide-vue-next'
 
-const store = useEscenariosStore()
+// Estado para controlar qué categorías están abiertas
+// Aquí le decimos que por defecto el ID 'comercio' inicie abierto
+const categoriasAbiertas = ref<string[]>(['comercio'])
 
-onMounted(() => {
-  store.fetchEscenarios()
-})
+// Función para abrir/cerrar categorías
+const toggleCategoria = (id: string) => {
+  const index = categoriasAbiertas.value.indexOf(id)
+  if (index === -1) {
+    // Si no está en la lista, la agregamos (abrimos)
+    categoriasAbiertas.value.push(id)
+  } else {
+    // Si ya está en la lista, la sacamos (cerramos)
+    categoriasAbiertas.value.splice(index, 1)
+  }
+}
+
+// Datos de las categorías
+const categorias = [
+  {
+    id: 'comercio',
+    nombre: 'Comercio y Servicios',
+    icono: Store,
+    escenarios: [
+      {
+        id: 1,
+        titulo: 'En la Panadería',
+        claseFondo: 'bg-panaderia',
+        iconoOtro: Store,
+        chat: [
+          { emisor: 'usuario', texto: '"Hola vecino, ¿me da una hallulla calientita? ¡Ojalá que no esté dura como palo!"' },
+          { emisor: 'otro', texto: '"¡Al tiro jefe! Están recién salidas. Estas vuelan a esta hora."' }
+        ],
+        traduccion: {
+          literal: 'Hola persona que vive al lado. Ojalá el pan no sea un trozo de madera. / ¡Inmediatamente jefe de la empresa! Estos panes tienen alas y vuelan.',
+          real: 'Hola vendedor. Ojalá el pan esté fresco. / ¡Enseguida señor! Están recién horneados. Se venden muy rápido a esta hora.',
+          nota: 'Llamar "vecino" o "jefe" al vendedor es una muestra de cordialidad casual, no implica que vivan cerca ni que haya un contrato de trabajo.'
+        }
+      }
+    ]
+  },
+  {
+    id: 'amigos',
+    nombre: 'Juntas y Amigos',
+    icono: Users,
+    escenarios: [
+      {
+        id: 2,
+        titulo: 'Llegando tarde a la junta',
+        claseFondo: 'bg-amigos',
+        iconoOtro: Utensils,
+        chat: [
+          { emisor: 'usuario', texto: '"Oye, voy un poco atrasado, me pilló un taco infernal."' },
+          { emisor: 'otro', texto: '"Ya po, apúrate que estamos todos patos y tú traes las lucas."' }
+        ],
+        traduccion: {
+          literal: 'Me atrapó un zapato de mujer del infierno. / Apresúrate que somos aves acuáticas y tú traes a un hombre llamado Lucas.',
+          real: 'Voy retrasado por culpa de un tráfico vehicular muy denso. / Apresúrate que no tenemos dinero y tú traes el efectivo para comprar.',
+          nota: '"Taco" significa embotellamiento. "Estar pato" es estar sin dinero. "Lucas" se refiere a los billetes de mil pesos.'
+        }
+      }
+    ]
+  }
+]
 </script>
 
 <style scoped>
 .escenarios-container {
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -147,7 +166,7 @@ onMounted(() => {
   padding-bottom: 3rem;
 }
 
-/* Header con barra lateral */
+/* Encabezado */
 .view-header {
   border-left: 6px solid var(--brand-dark);
   padding-left: 1.5rem;
@@ -160,169 +179,118 @@ onMounted(() => {
   color: #111;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
-  letter-spacing: -0.02em;
 }
 
 .subtitle {
   font-size: 1rem;
   color: var(--text-main);
-  max-width: 800px;
   line-height: 1.5;
 }
 
-/* Grilla de 3 columnas */
-.escenarios-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+/* --- BOTÓN DESPLEGABLE DE CATEGORÍA --- */
+.category-section {
+  margin-bottom: 1.5rem;
 }
 
-/* Base de Tarjetas */
-.card {
+.category-toggle-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 1.2rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+}
+
+.category-toggle-btn:hover {
+  background-color: #fcfcfc;
+  border-color: #d1dbbd; /* Ilumina el borde con tu verde claro al pasar el mouse */
+}
+
+/* Si la categoría está abierta, le damos un estilo sutilmente diferente al botón */
+.category-toggle-btn[aria-expanded="true"] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: 2px solid var(--brand-input);
+  background-color: #fbfcf9;
+}
+
+.cat-title-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.category-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--brand-dark);
+  margin: 0;
+}
+
+.cat-icon {
+  color: #a45a41;
+}
+
+.toggle-icon {
+  color: var(--text-muted);
+}
+
+/* --- LISTA DE ESCENARIOS --- */
+.scenarios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  /* El contenido se "adhiere" al botón de arriba */
+  background-color: transparent;
+  padding-top: 1.5rem; 
+}
+
+/* Tarjeta del Escenario */
+.scenario-card {
   background-color: #ffffff;
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.05);
   box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
-  position: relative;
 }
 
-.wide-card {
-  grid-column: span 2;
-}
-
-.normal-card {
-  grid-column: span 1;
-}
-
-/* Tarjeta Profesional */
-.gradient-profesional {
-  background: linear-gradient(135deg, #f9fbf7 0%, #edf1e6 100%);
-  padding: 2rem;
-  justify-content: center;
-}
-
-.card-badge {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background-color: #e2e8d5;
-  color: #555f44;
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  letter-spacing: 0.05em;
-}
-
-.profesional-content {
-  max-width: 60%;
-  z-index: 1;
-}
-
-.tag-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: rgba(255,255,255,0.8);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  width: fit-content;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--brand-dark);
-  margin-bottom: 1rem;
-}
-
-.profesional-content h2 {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #111;
-  margin-bottom: 0.75rem;
-}
-
-.profesional-content p {
-  font-size: 0.95rem;
-  color: #444;
-  margin-bottom: 1.5rem;
-  line-height: 1.4;
-}
-
-.action-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #111;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-/* Tarjeta Junta con Amigos */
-.image-placeholder {
-  height: 160px;
-  background-color: #2c2c2c; 
-  position: relative;
-  border-radius: 8px;
-  margin: 1rem 1rem 0 1rem;
-}
-
-.icon-badge {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background-color: #ffffff;
-  padding: 0.4rem;
-  border-radius: 6px;
-  display: flex;
-}
-
-.card-content {
-  padding: 1.5rem;
-}
-
-.card-content h3 {
-  font-size: 1.2rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-}
-
-.card-content p {
-  font-size: 0.9rem;
-  color: var(--text-main);
-  line-height: 1.4;
-}
-
-.no-padding {
-  padding: 0;
-}
-
-.bread-placeholder {
-  margin: 0;
-  border-radius: 0;
+/* Imagen de Cabecera */
+.scenario-image-header {
   height: 120px;
-  background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.6)), #8b6d4f;
   display: flex;
   align-items: flex-end;
   padding: 1.5rem;
 }
 
-.scenario-title-overlay {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.bg-panaderia {
+  background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), #8b6d4f;
+}
+
+.bg-amigos {
+  background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), #4f738b;
+}
+
+.header-overlay h3 {
   color: #ffffff;
-}
-
-.scenario-title-overlay h2 {
   font-size: 1.4rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.chat-container {
+/* Cuerpo: Chat + Traducción */
+.scenario-body {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
   padding: 1.5rem;
+}
+
+/* Columna Chat */
+.chat-column {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -331,7 +299,7 @@ onMounted(() => {
 .chat-row {
   display: flex;
   gap: 1rem;
-  max-width: 80%;
+  max-width: 90%;
 }
 
 .chat-row.left { align-self: flex-start; }
@@ -348,176 +316,91 @@ onMounted(() => {
 }
 
 .user-avatar { background-color: #e5e7eb; color: #555; }
-.vendor-avatar { background-color: #555f44; color: #fff; }
+.vendor-avatar { background-color: var(--brand-dark); color: #fff; }
 
 .chat-bubble {
-  background-color: #f4f5f1;
+  background-color: var(--brand-card-inner);
   padding: 1rem;
   border-radius: 12px;
   font-size: 0.95rem;
   color: #111;
   line-height: 1.4;
-  border: 1px solid #ebece6;
 }
 
 .chat-row.left .chat-bubble { border-top-left-radius: 4px; }
-.chat-row.right .chat-bubble { border-top-right-radius: 4px; }
+.chat-row.right .chat-bubble { border-top-right-radius: 4px; background-color: #f4f5f1; border: 1px solid #ebece6; }
 
-.chat-actions {
+/* Columna Traducción */
+.translation-column {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
-  margin-top: 0.5rem;
-}
-
-.chat-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: #333;
-}
-
-/* Tarjeta Guía de Interpretación */
-.interpretation-card {
-  padding: 1.5rem;
-}
-
-.interp-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.75rem;
 }
 
 .interp-box {
-  background-color: #f6f8f2;
+  background-color: #fdfdfb;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.2rem;
-  margin-bottom: 1rem;
 }
 
-.social-suggestion {
-  background-color: #eceee6;
+.social-note {
+  background-color: var(--brand-sidebar);
+  border: none;
+}
+
+.social-note p {
+  color: var(--brand-dark);
 }
 
 .box-label {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  color: #666;
-  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
   letter-spacing: 0.05em;
 }
 
+.social-note .box-label {
+  color: var(--brand-dark);
+}
+
 .interp-box h4 {
-  font-size: 0.95rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: #111;
+  margin-bottom: 0.25rem;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.literal-text {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.real-text {
+  font-size: 0.95rem;
+  color: #111;
+  font-weight: 500;
 }
 
 .interp-box p {
-  font-size: 0.85rem;
-  color: #444;
+  font-size: 0.9rem;
   line-height: 1.4;
 }
 
-/* Tarjetas Pequeñas Inferiores */
-.small-action-card {
-  padding: 1.5rem;
-  flex-direction: row;
-  align-items: center;
-  gap: 1rem;
-  background-color: #f6f8f2;
-}
-
-.icon-wrapper {
-  background-color: #e2e8d5;
-  padding: 0.75rem;
-  border-radius: 8px;
-  color: var(--brand-dark);
-}
-
-.small-action-card h4 {
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #111;
-}
-
-.small-action-card p {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.dashed-border {
-  border: 2px dashed #ccd4be;
-  background-color: #ffffff;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
-
-.btn-suggest {
-  margin-top: 0.5rem;
-  background-color: #e2e8d5;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--brand-dark);
-  cursor: pointer;
-}
-
-.disabled-card {
-  background-color: #eceef0;
-  justify-content: center;
-  text-align: center;
-  border: none;
-}
-
-.coming-soon-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  opacity: 0.5;
-}
-
-.muted-icon {
-  color: #999;
-  margin-bottom: 0.25rem;
-}
-
 /* Responsividad */
-@media (max-width: 1024px) {
-  .escenarios-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .wide-card, .normal-card, .small-action-card {
-    grid-column: span 1;
-  }
-}
-
-@media (max-width: 768px) {
-  .escenarios-grid {
+@media (max-width: 850px) {
+  .scenario-body {
     grid-template-columns: 1fr;
   }
-  .chat-row { max-width: 95%; }
-  .profesional-content { max-width: 100%; }
+  .chat-row { max-width: 100%; }
 }
 </style>
