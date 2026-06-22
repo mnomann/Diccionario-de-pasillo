@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS frase (
     nivel_sarcasmo      INTEGER         NOT NULL DEFAULT 0
                                         CHECK (nivel_sarcasmo BETWEEN 0 AND 10),
     ejemplo_uso         VARCHAR(500)    DEFAULT NULL,
+    conversacion        JSONB           DEFAULT NULL,
     activo              BOOLEAN         DEFAULT TRUE,
     fecha_creacion      TIMESTAMPTZ     DEFAULT NOW(),
     fecha_actualizacion TIMESTAMPTZ     DEFAULT NULL

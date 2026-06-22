@@ -10,7 +10,7 @@ from app.schemas.escenario import (
     EscenarioList,
     PaginatedEscenarioResponse,
 )
-from app.schemas.frase import FraseList
+from app.schemas.frase import FraseDetail, FraseList
 from app.services.escenario_service import (
     FiltrosEscenario,
     get_escenario,
@@ -98,5 +98,5 @@ async def obtener_escenario(
         activo=escenario.activo,
         fecha_creacion=escenario.fecha_creacion,
         fecha_actualizacion=escenario.fecha_actualizacion,
-        frases=[FraseList.model_validate(f) for f in frases_activas],
+        frases=[FraseDetail.model_validate(f) for f in frases_activas],
     )

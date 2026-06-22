@@ -25,6 +25,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -288,6 +289,7 @@ class Frase(Base):
         Integer, default=0, server_default="0"
     )
     ejemplo_uso: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    conversacion: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     activo: Mapped[Optional[bool]] = mapped_column(
         Boolean, default=True, server_default="true"
     )

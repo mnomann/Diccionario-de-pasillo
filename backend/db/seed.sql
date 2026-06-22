@@ -230,8 +230,8 @@ INSERT INTO palabra (palabra, traduccion, categoria, nivel_formalidad, nivel_iro
      '["fileteque"]'::jsonb);
 
 -- 3. Frases -----------------------------------------------------------------
-INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, intencion_real, nivel_formalidad, nivel_ironia, nivel_sarcasmo, ejemplo_uso) VALUES
-    -- Amigos (3)
+INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, intencion_real, nivel_formalidad, nivel_ironia, nivel_sarcasmo, ejemplo_uso, conversacion) VALUES
+    -- Amigos (3) -- Fila 1
     (3,
      '¿Cachai lo que te digo?',
      '¿Entiendes lo que te digo?',
@@ -239,7 +239,9 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'neutro',
      'Verificar que el interlocutor esta comprendiendo y sigue activamente la conversacion.',
      1, 1, 0,
-     'Despues de explicar algo complicado: "Entonces el weon se fue con la plata, cachai lo que te digo?"'),
+     'Despues de explicar algo complicado: "Entonces el weon se fue con la plata, cachai lo que te digo?"',
+     $JSON${"participantes":["Carlos","Miguel"],"mensajes":[{"emisor":"Carlos","texto":"Oye Miguel, te cuento lo que paso con el arriendo de la pieza.","es_modismo":false},{"emisor":"Miguel","texto":"Dime, que paso?","es_modismo":false},{"emisor":"Carlos","texto":"Resulta que el weon que iba a llegar se fue a ultima hora con la plata del mes.","es_modismo":true},{"emisor":"Carlos","texto":"Ahora quedo la media embarrada, ¿cachai lo que te digo?","es_modismo":true},{"emisor":"Miguel","texto":"Ah ya, te entiendo. Que mala cuea compadre.","es_modismo":true}]}$JSON$::jsonb),
+    -- Amigos (3) -- Fila 2
     (3,
      'Estaba brigida la wea',
      'La situacion estaba muy intensa o peligrosa',
@@ -247,7 +249,9 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'directo',
      'Expresar que una experiencia fue emocional o fisicamente intensa, generando complicidad con el oyente.',
      1, 2, 1,
-     'Llegando a la casa: "Nos fuimos en la micro y habia un flaite gritando... estaba brigida la wea."'),
+     'Llegando a la casa: "Nos fuimos en la micro y habia un flaite gritando... estaba brigida la wea."',
+     $JSON${"participantes":["Javier","Pablo"],"mensajes":[{"emisor":"Javier","texto":"Weon, no te imaginas lo que me paso viniendo en la micro.","es_modismo":true},{"emisor":"Pablo","texto":"Que paso?","es_modismo":false},{"emisor":"Javier","texto":"Se subio un flaite a puro gritar, amenazando a la gente.","es_modismo":true},{"emisor":"Javier","texto":"Estaba brigida la wea, todos asustados.","es_modismo":true},{"emisor":"Pablo","texto":"Oh que susto. Menos mal que no te paso nada.","es_modismo":false}]}$JSON$::jsonb),
+    -- Amigos (3) -- Fila 3
     (3,
      'Me tinca que va a llegar tarde',
      'Tengo el presentimiento de que va a llegar tarde',
@@ -255,9 +259,10 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'neutro',
      'Compartir una opinion o intuicion sin sonar arrogante ni afirmativo.',
      2, 0, 0,
-     'Mirando el reloj: "Son las 9 y el entra a las 8:30... me tinca que va a llegar tarde."'),
+     'Mirando el reloj: "Son las 9 y el entra a las 8:30... me tinca que va a llegar tarde."',
+     $JSON${"participantes":["Camila","Sofia"],"mensajes":[{"emisor":"Camila","texto":"Son las 9 y el entraba a las 8:30.","es_modismo":false},{"emisor":"Sofia","texto":"Ya llego?","es_modismo":false},{"emisor":"Camila","texto":"Nada, ni senales. Me tinca que va a llegar tarde.","es_modismo":true},{"emisor":"Sofia","texto":"Siempre hace lo mismo, no entiendo por que no pone alarma.","es_modismo":false},{"emisor":"Camila","texto":"Ya me se la rutina, me tinca que llega al puro almuerzo.","es_modismo":true}]}$JSON$::jsonb),
 
-    -- Fiesta / Carrete (6)
+    -- Fiesta / Carrete (6) -- Fila 4
     (6,
      'Bacan el carrete de anoche',
      'Excelente la fiesta de anoche',
@@ -265,7 +270,9 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'directo',
      'Expresar satisfaccion y entusiasmo por un evento social reciente.',
      2, 0, 0,
-     'Llamando a un amigo al dia siguiente: "Oye, bacan el carrete de anoche, deberiamos repetir."'),
+     'Llamando a un amigo al dia siguiente: "Oye, bacan el carrete de anoche, deberiamos repetir."',
+     $JSON${"participantes":["Andrea","Mario"],"mensajes":[{"emisor":"Andrea","texto":"Oye Mario, bacan el carrete de anoche.","es_modismo":true},{"emisor":"Mario","texto":"Demasiado bueno, la musica estuvo filete.","es_modismo":true},{"emisor":"Andrea","texto":"Y la once que prepararon, chori.","es_modismo":true},{"emisor":"Mario","texto":"Deberiamos repetir el proximo finde.","es_modismo":false},{"emisor":"Andrea","texto":"Buena, yo llevo algo para picar.","es_modismo":false}]}$JSON$::jsonb),
+    -- Fiesta / Carrete (6) -- Fila 5
     (6,
      'Vamos a carretear este finde',
      'Vamos a ir de fiesta este fin de semana',
@@ -273,9 +280,10 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'directo',
      'Proponer un plan social de forma entusiasta.',
      1, 0, 0,
-     'En el trabajo el viernes: "Ya po, vamos a carretear este finde, nos merecemos un descanso."'),
+     'En el trabajo el viernes: "Ya po, vamos a carretear este finde, nos merecemos un descanso."',
+     $JSON${"participantes":["Luis","Valeria"],"mensajes":[{"emisor":"Luis","texto":"Ya po Valeria, viernes al fin. Vamos a carretear este finde.","es_modismo":true},{"emisor":"Valeria","texto":"Buena idea, nos merecemos un descanso despues de la semana brigida.","es_modismo":true},{"emisor":"Luis","texto":"Donde quieres ir?","es_modismo":false},{"emisor":"Valeria","texto":"Donde tu quieras, pero prometeme que no vamos a aperrar muy tarde.","es_modismo":true},{"emisor":"Luis","texto":"Jaja, prometido. A las 2 paramos.","es_modismo":false}]}$JSON$::jsonb),
 
-    -- Trabajo (4)
+    -- Trabajo (4) -- Fila 6
     (4,
      'Estoy chato de esta pega',
      'Estoy harto de este trabajo',
@@ -283,7 +291,9 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'directo',
      'Desahogar frustracion laboral con un colega de confianza.',
      1, 1, 0,
-     'En la cafeteria con un companero: "Llevo tres meses haciendo lo mismo, estoy chato de esta pega."'),
+     'En la cafeteria con un companero: "Llevo tres meses haciendo lo mismo, estoy chato de esta pega."',
+     $JSON${"participantes":["Ricardo","Daniela"],"mensajes":[{"emisor":"Ricardo","texto":"Daniela, llevo tres meses haciendo la misma pega repetitiva.","es_modismo":true},{"emisor":"Daniela","texto":"Si, yo tambien estoy media aburrida.","es_modismo":false},{"emisor":"Ricardo","texto":"Estoy chato de esta pega, no doy mas.","es_modismo":true},{"emisor":"Daniela","texto":"Ya hablamos con el jefe?","es_modismo":false},{"emisor":"Ricardo","texto":"Puro webia, dice que la proxima semana vemos.","es_modismo":true},{"emisor":"Daniela","texto":"Que lata, ojala se pongan las pilas.","es_modismo":true}]}$JSON$::jsonb),
+    -- Trabajo (4) -- Fila 7
     (4,
      'Aperrando no mas',
      'Aguantando y perseverando a pesar de todo',
@@ -291,7 +301,9 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'motivacional',
      'Manifestar determinacion y compromiso para continuar a pesar de las adversidades.',
      2, 0, 0,
-     'El jefe pregunta como va el proyecto: "Ahi vamos, aperrando no mas, pero vamos a cumplir."'),
+     'El jefe pregunta como va el proyecto: "Ahi vamos, aperrando no mas, pero vamos a cumplir."',
+     $JSON${"participantes":["Jefe","Pedro"],"mensajes":[{"emisor":"Jefe","texto":"Pedro, como va el proyecto de la base de datos?","es_modismo":false},{"emisor":"Pedro","texto":"Ahi vamos, aperrando no mas jefe.","es_modismo":true},{"emisor":"Jefe","texto":"Necesitamos que este listo para el lunes.","es_modismo":false},{"emisor":"Pedro","texto":"Tranqui, vamos a cumplir. Aunque este chato, le ponemos empeno.","es_modismo":true},{"emisor":"Jefe","texto":"Eso es lo que quiero escuchar, buen team.","es_modismo":false}]}$JSON$::jsonb),
+    -- Trabajo (4) -- Fila 8
     (4,
      'El jefe esta puro webiando con el proyecto',
      'El jefe esta perdiendo el tiempo o no tomando en serio el proyecto',
@@ -299,9 +311,10 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'ironico',
      'Expresar frustracion ante la percepcion de que un lider no esta tomando el trabajo con la seriedad debida.',
      1, 3, 2,
-     'En el almuerzo con colegas: "Llevamos un mes esperando su decision, el jefe esta puro webiando."'),
+     'En el almuerzo con colegas: "Llevamos un mes esperando su decision, el jefe esta puro webiando."',
+     $JSON${"participantes":["Tomas","Gabriela"],"mensajes":[{"emisor":"Tomas","texto":"Gabriela, llevamos un mes esperando que el jefe apruebe los cambios.","es_modismo":false},{"emisor":"Gabriela","texto":"Y dale con las vueltas, que dijo ahora?","es_modismo":false},{"emisor":"Tomas","texto":"Nada po, puro webiando con el proyecto.","es_modismo":true},{"emisor":"Gabriela","texto":"No se puede trabajar asi. Si no le importa, que avise no mas.","es_modismo":true},{"emisor":"Tomas","texto":"Es brigido, parece que esta en otra.","es_modismo":true}]}$JSON$::jsonb),
 
-    -- Familia (5)
+    -- Familia (5) -- Fila 9
     (5,
      'No seai leso, abrigate',
      'No seas tonto, abrigate',
@@ -309,7 +322,9 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'directo',
      'Expresar preocupacion por el bienestar de un ser querido usando un tono fraternal y cercano.',
      2, 0, 0,
-     'Al salir de la casa: "Hijo, no seai leso, abrigate que hace frio."'),
+     'Al salir de la casa: "Hijo, no seai leso, abrigate que hace frio."',
+     $JSON${"participantes":["Mama","Hijo"],"mensajes":[{"emisor":"Mama","texto":"Hijo, vas a salir asi nomas con ese frio?","es_modismo":false},{"emisor":"Hijo","texto":"No ma, esta templado, no hace tanto frio.","es_modismo":false},{"emisor":"Mama","texto":"No seai leso, abrigate que hace frio afuera.","es_modismo":true},{"emisor":"Hijo","texto":"Ya ma, ya voy a buscar la chaqueta.","es_modismo":false},{"emisor":"Mama","texto":"Y tomate la once antes de salir. Puro webiando y despues llegai con hambre.","es_modismo":true}]}$JSON$::jsonb),
+    -- Familia (5) -- Fila 10
     (5,
      'Puro webiando todo el dia',
      'Pasaste todo el dia sin hacer nada productivo',
@@ -317,9 +332,10 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'ironico',
      'Senalar de manera informal que alguien no ha sido productivo durante el dia.',
      1, 3, 1,
-     'La mama al hijo que llega del trabajo: "¿Y? ¿Puro webiando todo el dia en la calle?"'),
+     'La mama al hijo que llega del trabajo: "¿Y? ¿Puro webiando todo el dia en la calle?"',
+     $JSON${"participantes":["Mama","Hijo"],"mensajes":[{"emisor":"Mama","texto":"Llegaste tarde hoy.","es_modismo":false},{"emisor":"Hijo","texto":"Es que habia pega acumulada.","es_modismo":true},{"emisor":"Mama","texto":"Seguro. Y? Puro webiando todo el dia en la calle con los amigos.","es_modismo":true},{"emisor":"Hijo","texto":"No ma, de verdad trabaje.","es_modismo":false},{"emisor":"Mama","texto":"Ya ya, anda a lavarte las manos que la comida esta lista.","es_modismo":false}]}$JSON$::jsonb),
 
-    -- Entrevista laboral (1)
+    -- Entrevista laboral (1) -- Fila 11
     (1,
      'Estoy dando jugo',
      'Estoy poniendome nervioso o actuando de forma forzada',
@@ -327,7 +343,9 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'neutro',
      'Reconocer el propio nerviosismo o ansiedad en una situacion de presion.',
      2, 1, 0,
-     'Antes de entrar a la entrevista: "Estoy dando jugo con esto, voy a respirar profundo."'),
+     'Antes de entrar a la entrevista: "Estoy dando jugo con esto, voy a respirar profundo."',
+     $JSON${"participantes":["Francisca","Andres"],"mensajes":[{"emisor":"Andres","texto":"Tranquila Francisca, es solo una entrevista.","es_modismo":false},{"emisor":"Francisca","texto":"No puedo, estoy dando jugo con esto.","es_modismo":true},{"emisor":"Andres","texto":"Relajate, respira hondo. Tu puedes.","es_modismo":false},{"emisor":"Francisca","texto":"Si, pero si me pongo nerviosa voy a echar la talla y quedar como lesa.","es_modismo":true},{"emisor":"Andres","texto":"Mejor anda natural no mas y aperra.","es_modismo":true}]}$JSON$::jsonb),
+    -- Entrevista laboral (1) -- Fila 12
     (1,
      'Echar la talla en la entrevista',
      'Hacer bromas o comentarios graciosos en la entrevista',
@@ -335,9 +353,10 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'humoristico',
      'Describir un intento de usar el humor para manejar una situacion formal y tensa.',
      2, 2, 0,
-     'Practicando la entrevista: "Le eche la talla con el tema del trafico y el entrevistador se rio."'),
+     'Practicando la entrevista: "Le eche la talla con el tema del trafico y el entrevistador se rio."',
+     $JSON${"participantes":["Ricardo","Lorena"],"mensajes":[{"emisor":"Lorena","texto":"Como te fue en la entrevista?","es_modismo":false},{"emisor":"Ricardo","texto":"Bien, le eche la talla con el tema del trafico y el entrevistador se rio.","es_modismo":true},{"emisor":"Lorena","texto":"Jaja. Y eso no fue muy informal?","es_modismo":false},{"emisor":"Ricardo","texto":"No po, cayo bien. Me dijo que le gusta la gente con humor.","es_modismo":true},{"emisor":"Lorena","texto":"Ojala quedes, la pega es bacan.","es_modismo":true}]}$JSON$::jsonb),
 
-    -- Medico (2)
+    -- Medico (2) -- Fila 13
     (2,
      'Me duele la guata',
      'Me duele el estomago / abdomen',
@@ -345,7 +364,9 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'directo',
      'Describir un sintoma fisico de manera coloquial y comprensible.',
      2, 0, 0,
-     'En la consulta: "Doctor, desde ayer me duele la guata y no he podido comer bien."'),
+     'En la consulta: "Doctor, desde ayer me duele la guata y no he podido comer bien."',
+     $JSON${"participantes":["Paciente","Doctor"],"mensajes":[{"emisor":"Doctor","texto":"Buenos dias, en que puedo ayudarlo?","es_modismo":false},{"emisor":"Paciente","texto":"Doctor, desde ayer me duele la guata y no he podido comer bien.","es_modismo":true},{"emisor":"Doctor","texto":"Donde exactamente le duele?","es_modismo":false},{"emisor":"Paciente","texto":"Aqui en la guata, como un dolor punzante.","es_modismo":true},{"emisor":"Doctor","texto":"Vamos a hacer una ecografia para verificar. No se preocupe, puede ser solo una indigestion.","es_modismo":false}]}$JSON$::jsonb),
+    -- Medico (2) -- Fila 14
     (2,
      'Estoy cuatico con los examenes',
      'Estoy muy preocupado o ansioso por los examenes medicos',
@@ -353,7 +374,8 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      'directo',
      'Expresar ansiedad o preocupacion intensa por resultados de examenes de salud.',
      2, 0, 0,
-     'Esperando resultados: "Estoy cuatico con los examenes, no he podido dormir bien."');
+     'Esperando resultados: "Estoy cuatico con los examenes, no he podido dormir bien."',
+     $JSON${"participantes":["Marcela","Carolina"],"mensajes":[{"emisor":"Carolina","texto":"Marcela, te hiciste los examenes al final?","es_modismo":false},{"emisor":"Marcela","texto":"Si, pero estoy esperando los resultados y estoy cuatica.","es_modismo":true},{"emisor":"Carolina","texto":"No te hagas la cabeza, seguro esta todo bien.","es_modismo":false},{"emisor":"Marcela","texto":"No se, estoy cuatica con los examenes, no he podido dormir bien.","es_modismo":true},{"emisor":"Carolina","texto":"Si quieres te acompano a buscarlos.","es_modismo":false},{"emisor":"Marcela","texto":"Gracias, eres seca. ANDEMOS.","es_modismo":true}]}$JSON$::jsonb);
 
 -- 4. Frase-Palabra (relaciones N:M) -----------------------------------------
 INSERT INTO frase_palabra (frase_id, palabra_id, relevancia) VALUES
