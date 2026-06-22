@@ -56,6 +56,17 @@ export interface FraseList {
   fecha_creacion: string
 }
 
+export interface MensajeChat {
+  emisor: string
+  texto: string
+  es_modismo: boolean
+}
+
+export interface Conversacion {
+  participantes: string[]
+  mensajes: MensajeChat[]
+}
+
 export interface FraseDetail {
   id: number
   escenario_id: number | null
@@ -69,6 +80,7 @@ export interface FraseDetail {
   nivel_ironia: number
   nivel_sarcasmo: number
   ejemplo_uso: string | null
+  conversacion: Conversacion | null
   activo: boolean
   fecha_creacion: string
   fecha_actualizacion: string | null
@@ -97,7 +109,7 @@ export interface EscenarioDetail {
   activo: boolean
   fecha_creacion: string
   fecha_actualizacion: string | null
-  frases: FraseList[]
+  frases: FraseDetail[]
 }
 
 export interface PaginatedEscenarios {

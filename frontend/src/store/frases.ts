@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api } from '../services/api'
-import type { FraseList, PaginatedFrases } from '../types'
+import type { FraseDetail, FraseList, PaginatedFrases } from '../types'
 
 interface FraseDisplay {
   id: number
@@ -25,6 +25,7 @@ const MOCK_FRASES: FraseDisplay[] = [
 
 export const useFrasesStore = defineStore('frases', () => {
   const frases = ref<FraseDisplay[]>(MOCK_FRASES)
+  const fraseActual = ref<FraseDetail | null>(null)
   const loading = ref(false)
   const usandoMock = ref(true)
 
@@ -60,10 +61,24 @@ export const useFrasesStore = defineStore('frases', () => {
     }
   }
 
+  async function fetchFrase(id: number) {
+    loading.value = true
+    try {
+      fraseActual.value = await api.get<FraseDetail>(`/frases/${id}`)
+      usandoMock.value = false
+    } catch {
+      fraseActual.value = null
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     frases,
+    fraseActual,
     loading,
     usandoMock,
     fetchFrases,
+    fetchFrase,
   }
 })

@@ -11,6 +11,7 @@ const router = createRouter({
     { path: '/diccionario', name: 'diccionario', component: DiccionarioView },
     { path: '/frases', name: 'frases', component: FrasesView },
     { path: '/escenarios', name: 'escenarios', component: EscenariosView },
+    { path: '/escenarios/:eid/frases/:fid', name: 'frase-chat', component: () => import('../views/FraseChatView.vue') },
   ]
 })
 
