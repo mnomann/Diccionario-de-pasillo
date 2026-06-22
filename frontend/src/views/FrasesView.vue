@@ -1,7 +1,5 @@
 <template>
   <div class="frases-container">
-    
-    <!-- Encabezado y Botones de Acción -->
     <header class="view-header">
       <div class="header-text">
         <h1 class="title">Frases Frecuentes</h1>
@@ -19,18 +17,24 @@
       </div>
     </header>
 
-    <!-- Grilla de Tarjetas -->
-    <div v-if="store.loading" class="loading-state">Cargando...</div>
-    <div v-else class="frases-grid">
-      <article 
-        v-for="frase in store.frases" 
-        :key="frase.id" 
+    <div v-if="store.loading" class="loading-state">
+      <div class="loading-spinner" />
+      <p>Cargando frases...</p>
+    </div>
+
+    <TransitionGroup v-else name="card-enter" tag="div" class="frases-grid">
+      <article
+        v-for="(frase, idx) in store.frases"
+        :key="frase.id"
         :class="['frase-card', frase.type === 'wide' ? 'wide-card' : 'normal-card']"
+        :style="{ '--card-delay': idx * 0.04 + 's' }"
       >
-        
         <template v-if="frase.type === 'normal'">
           <div class="card-image-placeholder">
-            <span>Ilustración: {{ frase.word }}</span>
+            <div class="placeholder-icon">
+              <MessageSquare :size="24" />
+            </div>
+            <span class="placeholder-text">{{ frase.word }}</span>
           </div>
           <div class="card-content">
             <div class="card-top-row">
@@ -38,7 +42,7 @@
               <Volume2 :size="18" class="speaker-icon" />
             </div>
             <p class="word-meaning">{{ frase.meaning }}</p>
-            
+
             <div v-if="frase.tags" class="tags-row">
               <span v-for="tag in frase.tags" :key="tag" class="tag">{{ tag }}</span>
             </div>
@@ -54,31 +58,28 @@
               </div>
               <Volume2 :size="20" class="speaker-icon" />
             </div>
-            
+
             <div class="example-quote">
               <p>{{ frase.example }}</p>
             </div>
-            
+
             <div class="tags-row">
               <span v-for="tag in frase.tags" :key="tag" class="tag dark-tag">{{ tag }}</span>
             </div>
           </div>
         </template>
-
       </article>
-    </div>
+    </TransitionGroup>
 
-    <!-- Botón Inferior -->
     <div class="bottom-action">
       <button class="btn-load-more">Cargar más frases</button>
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { Filter, Plus, Volume2 } from 'lucide-vue-next'
+import { Filter, Plus, Volume2, MessageSquare } from 'lucide-vue-next'
 import { useFrasesStore } from '../store/frases'
 
 const store = useFrasesStore()
@@ -89,6 +90,20 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@keyframes viewFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardFadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .frases-container {
   max-width: 1100px;
   margin: 0 auto;
@@ -96,13 +111,16 @@ onMounted(() => {
   flex-direction: column;
   gap: 2rem;
   padding-bottom: 3rem;
+  animation: viewFadeIn 0.5s ease both;
 }
 
-/* Header y botones */
+/* ===== Header ===== */
 .view-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  border-left: 6px solid var(--brand-dark);
+  padding-left: 1.5rem;
 }
 
 .title {
@@ -122,7 +140,8 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.btn-filter, .btn-new {
+.btn-filter,
+.btn-new {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -136,12 +155,13 @@ onMounted(() => {
 
 .btn-filter {
   background-color: transparent;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color, #e2e5dc);
   color: #333;
 }
 
 .btn-filter:hover {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0,0,0,0.04);
+  border-color: #bbb;
 }
 
 .btn-new {
@@ -152,23 +172,66 @@ onMounted(() => {
 
 .btn-new:hover {
   opacity: 0.9;
+  box-shadow: 0 2px 6px rgba(45, 51, 34, 0.15);
 }
 
-/* Grilla (4 columnas) */
+/* ===== Estados ===== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-color, #e2e5dc);
+  border-top-color: var(--brand-dark);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ===== TransitionGroup: entrada escalonada ===== */
+.card-enter-enter-active {
+  animation: cardFadeSlideUp 0.35s ease both;
+  animation-delay: var(--card-delay, 0s);
+}
+
+.card-enter-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.card-enter-enter-from,
+.card-enter-leave-to {
+  opacity: 0;
+}
+
+/* ===== Grilla ===== */
 .frases-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
 
-/* Tarjetas */
+/* ===== Tarjetas ===== */
 .frase-card {
   background-color: #ffffff;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #eef0e8;
+  border: 1px solid var(--border-color, #e2e5dc);
   display: flex;
   flex-direction: column;
+  transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.frase-card:hover {
+  box-shadow: 0 6px 20px rgba(45, 51, 34, 0.08);
+  transform: translateY(-2px);
+  border-color: var(--brand-dark);
 }
 
 .wide-card {
@@ -176,7 +239,6 @@ onMounted(() => {
   padding: 1.5rem;
   justify-content: center;
   background-color: #ffffff;
-  /* Simulación sutil de la marca de agua del diseño */
   background-image: radial-gradient(circle at 70% 50%, #f7f9f4 0%, transparent 40%);
 }
 
@@ -184,21 +246,41 @@ onMounted(() => {
   grid-column: span 1;
 }
 
-/* Imagen superior (Placeholder para tarjeta normal) */
+/* ===== Placeholder de imagen ===== */
 .card-image-placeholder {
   height: 140px;
-  background-color: #f6e6cd; /* Color crema genérico del fondo de las ilustraciones */
+  background: linear-gradient(135deg, #f6e6cd, #f0dcc0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  color: #8c7d6b;
+}
+
+.placeholder-icon {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #8c7d6b;
-  font-size: 0.8rem;
-  font-style: italic;
-  text-align: center;
-  padding: 1rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transition: transform 0.25s ease;
 }
 
-/* Contenido tarjeta normal */
+.frase-card:hover .placeholder-icon {
+  transform: scale(1.1);
+}
+
+.placeholder-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* ===== Contenido tarjeta normal ===== */
 .card-content {
   padding: 1rem;
   display: flex;
@@ -222,6 +304,12 @@ onMounted(() => {
 .speaker-icon {
   color: var(--text-muted);
   cursor: pointer;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.speaker-icon:hover {
+  color: var(--brand-dark);
 }
 
 .word-meaning {
@@ -232,7 +320,7 @@ onMounted(() => {
   flex-grow: 1;
 }
 
-/* Etiquetas */
+/* ===== Tags ===== */
 .tags-row {
   display: flex;
   gap: 0.5rem;
@@ -254,7 +342,7 @@ onMounted(() => {
   color: #ffffff;
 }
 
-/* Contenido especial para tarjeta ancha */
+/* ===== Contenido tarjeta ancha ===== */
 .wide-content-wrapper {
   display: flex;
   flex-direction: column;
@@ -279,7 +367,7 @@ onMounted(() => {
 }
 
 .example-quote {
-  border-left: 3px solid #ccc;
+  border-left: 3px solid var(--border-color, #e2e5dc);
   padding-left: 1rem;
   margin-bottom: 2rem;
 }
@@ -290,7 +378,7 @@ onMounted(() => {
   font-size: 0.95rem;
 }
 
-/* Botón cargar más */
+/* ===== Botón cargar más ===== */
 .bottom-action {
   display: flex;
   justify-content: center;
@@ -299,7 +387,7 @@ onMounted(() => {
 
 .btn-load-more {
   background-color: #ffffff;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color, #e2e5dc);
   color: #333;
   padding: 0.75rem 2rem;
   border-radius: 999px;
@@ -311,10 +399,11 @@ onMounted(() => {
 
 .btn-load-more:hover {
   background-color: #f9f9f9;
-  border-color: #999;
+  border-color: var(--brand-dark);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 
-/* Responsividad */
+/* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .frases-grid {
     grid-template-columns: repeat(2, 1fr);
