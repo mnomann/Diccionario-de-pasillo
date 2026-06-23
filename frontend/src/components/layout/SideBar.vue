@@ -38,7 +38,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Traductor', icon: Languages },
+  { path: '/traductor', label: 'Traductor', icon: Languages },
   { path: '/diccionario', label: 'Diccionario', icon: Book },
   { path: '/escenarios', label: 'Escenarios', icon: Map },
   { path: '/frases', label: 'Frases Frecuentes', icon: Sun },
