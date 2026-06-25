@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.conversacion import Conversacion
 from app.models.frase import Frase
 from app.schemas.frase import FraseCreate
 from app.services.comun import aplicar_ordenamiento, aplicar_paginacion
@@ -75,7 +76,10 @@ async def get_frases(
 async def get_frase(db: AsyncSession, frase_id: int) -> Optional[Frase]:
     result = await db.execute(
         select(Frase)
-        .options(selectinload(Frase.escenario))
+        .options(
+            selectinload(Frase.escenario),
+            selectinload(Frase.conversacion).selectinload(Conversacion.mensajes),
+        )
         .where(Frase.id == frase_id, Frase.activo.is_(True))
     )
     return result.scalar_one_or_none()

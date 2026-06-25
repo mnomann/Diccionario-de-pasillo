@@ -1,12 +1,13 @@
 import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
 if TYPE_CHECKING:
+    from app.models.conversacion import Conversacion
     from app.models.escenario import Escenario
 
 
@@ -26,7 +27,6 @@ class Frase(Base):
     nivel_ironia: Mapped[float] = mapped_column(Float, default=5.0, nullable=False)
     nivel_sarcasmo: Mapped[float] = mapped_column(Float, default=5.0, nullable=False)
     ejemplo_uso: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    conversacion: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     fecha_creacion: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
@@ -43,6 +43,11 @@ class Frase(Base):
     escenario: Mapped[Optional["Escenario"]] = relationship(
         "Escenario",
         back_populates="frases",
+    )
+    conversacion: Mapped[Optional["Conversacion"]] = relationship(
+        "Conversacion",
+        back_populates="frase",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:

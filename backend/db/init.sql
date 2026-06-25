@@ -148,7 +148,6 @@ CREATE TABLE IF NOT EXISTS frase (
     nivel_sarcasmo      INTEGER         NOT NULL DEFAULT 0
                                         CHECK (nivel_sarcasmo BETWEEN 0 AND 10),
     ejemplo_uso         VARCHAR(500)    DEFAULT NULL,
-    conversacion        JSONB           DEFAULT NULL,
     activo              BOOLEAN         DEFAULT TRUE,
     fecha_creacion      TIMESTAMPTZ     DEFAULT NOW(),
     fecha_actualizacion TIMESTAMPTZ     DEFAULT NULL
@@ -170,7 +169,31 @@ CREATE TABLE IF NOT EXISTS sugerencia (
     fecha_actualizacion TIMESTAMPTZ         DEFAULT NULL
 );
 
--- 2.6. Tabla intermedia: Frase <-> Palabra (relacion N:M opcional)
+-- 2.6. Conversacion (relacion 1:1 con Frase)
+CREATE TABLE IF NOT EXISTS conversacion (
+    id              SERIAL          PRIMARY KEY,
+    frase_id        INTEGER         NOT NULL
+                                    REFERENCES frase(id)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE
+                                    UNIQUE,
+    participantes   JSONB           NOT NULL DEFAULT '[]'::jsonb
+);
+
+-- 2.7. Mensaje (relacion N:1 con Conversacion)
+CREATE TABLE IF NOT EXISTS mensaje (
+    id              SERIAL          PRIMARY KEY,
+    conversacion_id INTEGER         NOT NULL
+                                    REFERENCES conversacion(id)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE,
+    emisor          VARCHAR(200)    NOT NULL,
+    texto           TEXT            NOT NULL,
+    es_modismo      BOOLEAN         NOT NULL DEFAULT FALSE,
+    orden           INTEGER         NOT NULL DEFAULT 0
+);
+
+-- 2.8. Tabla intermedia: Frase <-> Palabra (relacion N:M opcional)
 CREATE TABLE IF NOT EXISTS frase_palabra (
     id                  SERIAL      PRIMARY KEY,
     frase_id            INTEGER     NOT NULL
@@ -260,6 +283,13 @@ CREATE INDEX IF NOT EXISTS idx_frase_tono
     ON frase (tono)
     WHERE tono IS NOT NULL;
 
+-- 3.6. Indices para conversacion y mensaje
+CREATE INDEX IF NOT EXISTS idx_conversacion_frase
+    ON conversacion (frase_id);
+
+CREATE INDEX IF NOT EXISTS idx_mensaje_conversacion
+    ON mensaje (conversacion_id);
+
 -- 4. Funciones y Triggers ----------------------------------------------------
 
 -- 4.1. Trigger para actualizar fecha_actualizacion automaticamente
@@ -329,3 +359,10 @@ COMMENT ON TABLE sugerencia IS 'Sugerencias de usuarios para nuevas palabras, fr
 COMMENT ON COLUMN sugerencia.contenido IS 'JSON con los datos de la sugerencia segun el tipo';
 
 COMMENT ON TABLE frase_palabra IS 'Relacion N:M entre frases y palabras (uso futuro con ML)';
+
+COMMENT ON TABLE conversacion IS 'Conversacion asociada 1:1 a una frase, simulando un chat ejemplificador';
+COMMENT ON COLUMN conversacion.participantes IS 'JSON array de strings con los nombres de los participantes';
+
+COMMENT ON TABLE mensaje IS 'Mensajes individuales dentro de una conversacion';
+COMMENT ON COLUMN mensaje.es_modismo IS 'Indica si el mensaje contiene el modismo/frase original';
+COMMENT ON COLUMN mensaje.orden IS 'Orden de aparicion del mensaje en la conversacion';
