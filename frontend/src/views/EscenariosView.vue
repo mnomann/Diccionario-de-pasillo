@@ -237,7 +237,7 @@ onMounted(() => {
 
 /* ===== Header ===== */
 .view-header {
-  border-left: 6px solid var(--brand-dark);
+  border-left: 6px solid var(--brand-accent);
   padding-left: 1.5rem;
   margin-bottom: 0.5rem;
 }

@@ -138,7 +138,7 @@ function ironiaClase(barIndex: number): string {
 
 /* ===== Encabezado ===== */
 .view-header {
-  border-left: 6px solid var(--brand-dark);
+  border-left: 6px solid var(--brand-accent);
   padding-left: 1.5rem;
 }
 
@@ -158,7 +158,7 @@ function ironiaClase(barIndex: number): string {
 .search-bar-container {
   width: 100%;
   height: 60px;
-  background-color: #E8EAE3;
+  background-color: rgba(var(--brand-note-rgb), 0.12);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -169,7 +169,7 @@ function ironiaClase(barIndex: number): string {
 .search-input-wrapper {
   flex: 1;
   height: 44px;
-  background-color: #CCCFB2;
+  background-color: var(--brand-sidebar);
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -178,7 +178,7 @@ function ironiaClase(barIndex: number): string {
 }
 
 .search-input-wrapper:focus-within {
-  box-shadow: 0 0 0 3px rgba(45, 51, 34, 0.12);
+  box-shadow: 0 0 0 3px rgba(var(--brand-dark-rgb), 0.12);
 }
 
 .search-input {
@@ -197,8 +197,8 @@ function ironiaClase(barIndex: number): string {
 
 .translate-btn {
   height: 44px;
-  background-color: #CCCFB2;
-  color: var(--brand-dark);
+  background-color: var(--brand-accent);
+  color: #fff;
   border: none;
   padding: 0 1.5rem;
   border-radius: 999px;
@@ -208,13 +208,13 @@ function ironiaClase(barIndex: number): string {
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  transition: opacity 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s, box-shadow 0.2s;
   white-space: nowrap;
 }
 
 .translate-btn:hover:not(:disabled) {
-  opacity: 0.85;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background-color: #3d4f30;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 .translate-btn:disabled {

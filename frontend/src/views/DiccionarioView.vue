@@ -113,7 +113,7 @@ function buscar() {
 
 /* ===== Encabezado ===== */
 .view-header {
-  border-left: 6px solid var(--brand-dark);
+  border-left: 6px solid var(--brand-accent);
   padding-left: 1.5rem;
 }
 
@@ -171,7 +171,7 @@ function buscar() {
 }
 
 .filter-btn {
-  background-color: #eef1e8;
+  background-color: rgba(var(--brand-note-rgb), 0.08);
   color: var(--text-muted);
   border: 1px solid transparent;
   padding: 0.5rem 1.2rem;
@@ -183,13 +183,13 @@ function buscar() {
 }
 
 .filter-btn:hover {
-  background-color: #e2e8d5;
-  border-color: var(--border-color, #e2e5dc);
+  background-color: rgba(var(--brand-note-rgb), 0.15);
+  border-color: rgba(var(--brand-note-rgb), 0.2);
 }
 
 .filter-btn.active {
-  background-color: var(--brand-tag);
-  color: #a45a41;
+  background-color: var(--brand-accent);
+  color: #fff;
   border-color: transparent;
 }
 
@@ -291,7 +291,7 @@ function buscar() {
 
 /* ===== Banner inferior ===== */
 .bottom-banner {
-  background-color: #ccd4be;
+  background: linear-gradient(135deg, #ccd4be 0%, #b8c4a8 100%);
   border-radius: 12px;
   padding: 2rem 3rem;
   margin-top: 2rem;
@@ -301,10 +301,11 @@ function buscar() {
   position: relative;
   overflow: hidden;
   transition: box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 
 .bottom-banner:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
 
 .banner-content h3 {
@@ -320,7 +321,7 @@ function buscar() {
 }
 
 .suggest-btn {
-  background-color: #c4a495;
+  background-color: var(--brand-accent);
   color: #ffffff;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -331,14 +332,14 @@ function buscar() {
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  transition: opacity 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s, box-shadow 0.2s;
   z-index: 1;
   flex-shrink: 0;
 }
 
 .suggest-btn:hover {
-  opacity: 0.9;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background-color: #3d4f30;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 /* ===== Responsive ===== */

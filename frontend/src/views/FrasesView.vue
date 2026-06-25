@@ -119,7 +119,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  border-left: 6px solid var(--brand-dark);
+  border-left: 6px solid var(--brand-accent);
   padding-left: 1.5rem;
 }
 
@@ -249,13 +249,13 @@ onMounted(() => {
 /* ===== Placeholder de imagen ===== */
 .card-image-placeholder {
   height: 140px;
-  background: linear-gradient(135deg, #f6e6cd, #f0dcc0);
+  background: linear-gradient(135deg, #dae0c8, #c8d2b0);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  color: #8c7d6b;
+  color: #5a6f42;
 }
 
 .placeholder-icon {
