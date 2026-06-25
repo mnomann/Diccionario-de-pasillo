@@ -31,9 +31,9 @@
         </div>
       </header>
 
-      <div v-if="store.fraseActual.conversacion" class="conversacion-container">
+      <div v-if="conversacionActual" class="conversacion-container">
         <div class="chat-participantes">
-          <span v-for="p in store.fraseActual.conversacion.participantes" :key="p" class="participante-chip">
+          <span v-for="p in conversacionActual.participantes" :key="p" class="participante-chip">
             <span class="participante-avatar" :style="{ background: colorParaParticipante(p) }">
               {{ iniciales(p) }}
             </span>
@@ -43,7 +43,7 @@
 
         <TransitionGroup name="burbuja-enter" tag="div" class="chat-burbujas">
           <div
-            v-for="(msg, i) in store.fraseActual.conversacion.mensajes"
+            v-for="(msg, i) in conversacionActual.mensajes"
             :key="i"
             class="burbuja-wrapper"
             :class="'alineacion--' + alinearMensaje(msg.emisor, i)"
@@ -98,15 +98,78 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { Briefcase, MessageCircle, MessageSquare, ArrowLeft } from 'lucide-vue-next'
 import { useFrasesStore } from '../store/frases'
+import type { Conversacion, FraseDetail } from '../types'
 
 const route = useRoute()
 const store = useFrasesStore()
 
 const fraseId = Number(route.params.fid)
+
+function generarConversacion(frase: FraseDetail): Conversacion {
+  const emisor1 = 'Carlos'
+  const emisor2 = 'María'
+  const f = frase.frase_original
+  const t = frase.traduccion
+
+  const mensajes: { emisor: string; texto: string; es_modismo: boolean }[] = [
+    {
+      emisor: emisor1,
+      texto: `Oye, anoche un amigo chileno me dijo "${f}" y me quedé pillo sin saber qué responder.`,
+      es_modismo: true,
+    },
+    {
+      emisor: emisor2,
+      texto: 'Jaja, te entiendo. Acá usan esas frases todo el tiempo.',
+      es_modismo: false,
+    },
+    {
+      emisor: emisor2,
+      texto: `"${f}" significa "${t[0].toLowerCase() + t.slice(1)}".`,
+      es_modismo: false,
+    },
+  ]
+
+  if (frase.explicacion) {
+    mensajes.push({
+      emisor: emisor1,
+      texto: `Ah, tiene sentido. O sea que ${frase.explicacion[0].toLowerCase() + frase.explicacion.slice(1)}`,
+      es_modismo: false,
+    })
+  }
+
+  if (frase.ejemplo_uso) {
+    mensajes.push({
+      emisor: emisor2,
+      texto: `Exacto. Por ejemplo: "${frase.ejemplo_uso}"`,
+      es_modismo: false,
+    })
+  }
+
+  mensajes.push(
+    {
+      emisor: emisor1,
+      texto: `Ya, ahora si alguien me suelta un "${f}" voy a cachar altiro.`,
+      es_modismo: true,
+    },
+    {
+      emisor: emisor2,
+      texto: 'Ahí está la weá buena, ya estai hablando como chileno jaja.',
+      es_modismo: false,
+    },
+  )
+
+  return { participantes: [emisor1, emisor2], mensajes }
+}
+
+const conversacionActual = computed<Conversacion | null>(() => {
+  if (store.fraseActual?.conversacion) return store.fraseActual.conversacion
+  if (store.fraseActual) return generarConversacion(store.fraseActual)
+  return null
+})
 
 const coloresParticipantes = [
   '#2d3322', '#5b6647', '#92400e', '#065f46',
@@ -131,8 +194,8 @@ function iniciales(nombre: string): string {
 }
 
 function alinearMensaje(emisor: string, _index: number): 'izquierda' | 'derecha' {
-  if (!store.fraseActual?.conversacion) return 'izquierda'
-  const primerEmisor = store.fraseActual.conversacion.participantes[0]
+  if (!conversacionActual.value) return 'izquierda'
+  const primerEmisor = conversacionActual.value.participantes[0]
   return emisor === primerEmisor ? 'izquierda' : 'derecha'
 }
 
@@ -157,6 +220,11 @@ onMounted(cargarFrase)
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -175,18 +243,19 @@ onMounted(cargarFrase)
   gap: 0.4rem;
   background: none;
   border: none;
-  color: var(--brand-dark);
+  color: var(--brand-accent);
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
   padding: 0.4rem 0.6rem;
   margin-bottom: 1.25rem;
   border-radius: 6px;
-  transition: background-color 0.15s;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .btn-volver:hover {
-  background: rgba(45, 51, 34, 0.06);
+  background: rgba(var(--brand-note-rgb), 0.1);
+  color: var(--brand-dark);
 }
 
 /* ===== Estados ===== */
@@ -204,7 +273,7 @@ onMounted(cargarFrase)
   width: 32px;
   height: 32px;
   border: 3px solid var(--border-color, #e2e5dc);
-  border-top-color: var(--brand-dark);
+  border-top-color: var(--brand-accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -218,22 +287,24 @@ onMounted(cargarFrase)
 .btn-retry {
   margin-top: 1rem;
   padding: 0.5rem 1.5rem;
-  background: var(--brand-dark);
+  background: var(--brand-accent);
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  transition: opacity 0.2s;
+  transition: background-color 0.2s;
 }
 
 .btn-retry:hover {
-  opacity: 0.85;
+  background: #3d4f30;
 }
 
 /* ===== Header ===== */
 .chat-header {
   margin-bottom: 2rem;
+  padding-left: 1.25rem;
+  border-left: 4px solid var(--brand-accent);
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--border-color, #e2e5dc);
 }
@@ -280,14 +351,13 @@ onMounted(cargarFrase)
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--border-color, #e2e5dc);
 }
 
 .chat-escenario {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-muted);
-  background: var(--brand-sidebar);
+  color: var(--brand-accent);
+  background: rgba(var(--brand-note-rgb), 0.1);
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
 }
@@ -307,8 +377,8 @@ onMounted(cargarFrase)
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--brand-dark);
-  background: var(--brand-sidebar);
+  color: #fff;
+  background: var(--brand-sidebar-deeper);
   padding: 0.35rem 0.85rem 0.35rem 0.35rem;
   border-radius: 999px;
 }
@@ -335,6 +405,8 @@ onMounted(cargarFrase)
   padding: 1.5rem;
   margin-bottom: 2rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  animation: slideUp 0.5s ease both;
+  animation-delay: 0.15s;
 }
 
 .chat-burbujas {
@@ -375,12 +447,12 @@ onMounted(cargarFrase)
   padding: 0.75rem 1rem;
   border-radius: 14px;
   position: relative;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .burbuja--normal {
-  background: #f3f4f6;
+  background: var(--brand-sidebar);
   color: #111;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .alineacion--izquierda .burbuja--normal {
@@ -395,6 +467,7 @@ onMounted(cargarFrase)
   background: #fef3c7;
   color: #111;
   border: 1px solid #fde68a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .alineacion--izquierda .burbuja--modismo {
@@ -440,8 +513,8 @@ onMounted(cargarFrase)
 
 /* ===== Sin conversación estructurada ===== */
 .sin-conversacion {
-  background: #f7f9f4;
-  border: 1px solid var(--border-color, #e2e5dc);
+  background: rgba(var(--brand-note-rgb), 0.06);
+  border: 1px solid rgba(var(--brand-note-rgb), 0.12);
   border-radius: 14px;
   padding: 2rem;
   margin-bottom: 2rem;
@@ -450,6 +523,8 @@ onMounted(cargarFrase)
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  animation: slideUp 0.5s ease both;
+  animation-delay: 0.15s;
 }
 
 .sin-conv-icon {
@@ -459,8 +534,8 @@ onMounted(cargarFrase)
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--brand-sidebar);
-  color: var(--brand-dark);
+  background: rgba(var(--brand-note-rgb), 0.15);
+  color: var(--brand-accent);
   margin-bottom: 0.25rem;
 }
 
@@ -489,6 +564,8 @@ onMounted(cargarFrase)
   border-radius: 14px;
   padding: 1.5rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  animation: slideUp 0.5s ease both;
+  animation-delay: 0.3s;
 }
 
 .contexto-title {
@@ -508,8 +585,8 @@ onMounted(cargarFrase)
 }
 
 .intencion-box {
-  background: #fafbf8;
-  border-left: 3px solid var(--brand-dark);
+  background: rgba(var(--brand-note-rgb), 0.06);
+  border-left: 3px solid var(--brand-accent);
   padding: 0.75rem 1rem;
   margin-top: 1rem;
   border-radius: 0 8px 8px 0;
@@ -546,8 +623,8 @@ onMounted(cargarFrase)
   gap: 0.3rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-muted);
-  background: #f3f4f6;
+  color: var(--brand-note);
+  background: rgba(var(--brand-note-rgb), 0.08);
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
 }
