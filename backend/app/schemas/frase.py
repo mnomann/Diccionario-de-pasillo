@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -10,6 +10,21 @@ class EscenarioResumen(BaseModel):
     id: int
     nombre: str
     icono: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+class MensajeSchema(BaseModel):
+    emisor: str
+    texto: str
+    es_modismo: bool
+
+    model_config = {"from_attributes": True}
+
+
+class ConversacionSchema(BaseModel):
+    participantes: list[str]
+    mensajes: list[MensajeSchema]
 
     model_config = {"from_attributes": True}
 
@@ -27,15 +42,6 @@ class FraseList(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class MensajeChat(BaseModel):
-    emisor: str = Field(..., description="Nombre del emisor del mensaje")
-    texto: str = Field(..., description="Contenido del mensaje")
-    es_modismo: bool = Field(False, description="Indica si el mensaje contiene modismos")
-
-class Conversacion(BaseModel):
-    participantes: list[str] = Field(..., description="Lista de participantes en la conversacion")
-    mensajes: list[MensajeChat] = Field(..., description="Mensajes de la conversacion")
-
 class FraseDetail(BaseModel):
     id: int
     escenario_id: Optional[int] = None
@@ -49,10 +55,10 @@ class FraseDetail(BaseModel):
     nivel_ironia: float
     nivel_sarcasmo: float
     ejemplo_uso: Optional[str] = None
-    conversacion: Optional[Conversacion] = None
     activo: bool
     fecha_creacion: datetime.datetime
     fecha_actualizacion: Optional[datetime.datetime] = None
+    conversacion: Optional[ConversacionSchema] = None
 
     model_config = {"from_attributes": True}
 

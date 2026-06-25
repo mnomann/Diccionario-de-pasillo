@@ -32,11 +32,12 @@ def get_url() -> str:
     """
     Obtiene la URL de la base de datos desde variable de entorno
     o usa el valor por defecto del alembic.ini.
+    Convierte +asyncpg a +psycopg2 para compatibilidad con Alembic sync.
     """
     url = os.getenv("DATABASE_URL")
-    if url:
-        return url
-    return config.get_main_option("sqlalchemy.url")
+    if not url:
+        url = config.get_main_option("sqlalchemy.url")
+    return url.replace("+asyncpg", "+psycopg2")
 
 
 def run_migrations_offline() -> None:
