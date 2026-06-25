@@ -47,20 +47,32 @@ const navItems: NavItem[] = [
 
 <style scoped>
 @keyframes navItemSlideIn {
-  from { opacity: 0; transform: translateX(-16px); }
+  from { opacity: 0; transform: translateX(-20px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
 .sidebar {
   width: 250px;
   height: 100%;
-  background-color: var(--brand-sidebar);
+  background: linear-gradient(180deg, #4a5d35 0%, #5a6f42 100%);
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(0,0,0,0.05);
+  border-right: 1px solid rgba(0,0,0,0.12);
   position: relative;
   z-index: 100;
   transition: transform 0.3s ease;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.06);
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg, transparent, transparent 2px,
+    rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px
+  );
+  pointer-events: none;
 }
 
 .sidebar-close {
@@ -70,7 +82,7 @@ const navItems: NavItem[] = [
   right: 1rem;
   background: none;
   border: none;
-  color: var(--brand-dark);
+  color: rgba(255,255,255,0.7);
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 4px;
@@ -78,24 +90,24 @@ const navItems: NavItem[] = [
 }
 
 .sidebar-close:hover {
-  background: rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.1);
 }
 
 .sidebar-header {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: relative;
 }
 
 .logo-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--brand-dark);
+  color: #fff;
 }
 
 .logo-subtitle {
   font-size: 0.875rem;
-  color: var(--brand-dark);
-  opacity: 0.8;
+  color: rgba(255,255,255,0.6);
   margin-top: 0.25rem;
 }
 
@@ -113,19 +125,20 @@ const navItems: NavItem[] = [
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  color: var(--brand-dark);
+  color: rgba(255,255,255,0.7);
   text-decoration: none;
   font-weight: 500;
   position: relative;
   overflow: hidden;
-  transition: background-color 0.2s, transform 0.15s;
+  transition: background-color 0.2s, transform 0.15s, color 0.2s;
   animation: navItemSlideIn 0.35s ease both;
   animation-delay: calc(var(--i, 0) * 0.06s);
 }
 
 .nav-item:hover {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(255,255,255,0.08);
   transform: translateX(3px);
+  color: #fff;
 }
 
 .nav-item:active {
@@ -136,7 +149,6 @@ const navItems: NavItem[] = [
   flex-shrink: 0;
 }
 
-/* Active indicator: left bar */
 .nav-item::before {
   content: '';
   position: absolute;
@@ -146,12 +158,13 @@ const navItems: NavItem[] = [
   width: 3px;
   height: 60%;
   border-radius: 0 3px 3px 0;
-  background: var(--brand-dark);
+  background: #a8c090;
   transition: transform 0.2s ease;
 }
 
 .nav-item.router-link-active {
-  background-color: #94cf82;
+  background-color: rgba(255,255,255,0.1);
+  color: #fff;
   font-weight: 700;
 }
 
@@ -165,7 +178,7 @@ const navItems: NavItem[] = [
     top: 0;
     left: 0;
     transform: translateX(-100%);
-    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.25);
   }
 
   .sidebar--open {

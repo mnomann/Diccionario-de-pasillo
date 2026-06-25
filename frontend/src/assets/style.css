@@ -1,14 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --brand-sidebar: #cdd5bf; 
-  --brand-bg: #f8f9f5;      
-  --brand-dark: #2d3322;    
-  --brand-input: #ccd4be;   
-  --brand-card-inner: #f1f3ed; 
-  --brand-note: #5b6647;    
-  --brand-tag: #f7dacb;    
-  
+  --brand-sidebar: #c2d0a8;
+  --brand-bg: #f4f6ed;
+  --brand-dark: #2d3322;
+  --brand-dark-rgb: 45, 51, 34;
+  --brand-input: #c2d0a8;
+  --brand-card-inner: #eaeedc;
+  --brand-note: #6b8050;
+  --brand-note-rgb: 107, 128, 80;
+  --brand-accent: #4a5d35;
+  --brand-tag: #f5cdb8;
+  --brand-sidebar-deeper: #5a6f42;
+
   --text-main: #1a1a1a;
   --text-muted: #666666;
 }

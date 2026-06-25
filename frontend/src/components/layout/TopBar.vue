@@ -38,8 +38,23 @@ defineEmits<{ 'toggle-sidebar': [] }>()
   justify-content: space-between;
   align-items: center;
   padding: 0 40px;
-  background-color: transparent;
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   animation: topBarFadeIn 0.4s ease both;
+}
+
+.top-nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-accent), var(--brand-sidebar-deeper));
+  opacity: 0.25;
 }
 
 .top-left {
@@ -60,7 +75,7 @@ defineEmits<{ 'toggle-sidebar': [] }>()
 }
 
 .hamburger:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0,0,0,0.06);
 }
 
 .logo-text {
@@ -68,7 +83,7 @@ defineEmits<{ 'toggle-sidebar': [] }>()
   font-size: 1.25rem;
   font-family: serif;
   font-style: italic;
-  border-bottom: 2px solid var(--brand-dark);
+  border-bottom: 2px solid var(--brand-sidebar-deeper);
   padding-bottom: 2px;
 }
 
@@ -91,7 +106,7 @@ defineEmits<{ 'toggle-sidebar': [] }>()
 }
 
 .action-btn:hover {
-  color: var(--brand-dark);
+  color: var(--brand-sidebar-deeper);
 }
 
 @media (max-width: 768px) {

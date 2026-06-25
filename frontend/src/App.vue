@@ -1,13 +1,14 @@
 <template>
-  <div class="app-shell">
-    <SideBar :is-open="sidebarOpen" @toggle="toggleSidebar" />
+  <div class="app-shell" :class="{ 'app-shell--landing': esLanding }">
+    <template v-if="!esLanding">
+      <SideBar :is-open="sidebarOpen" @toggle="toggleSidebar" />
+      <div v-if="sidebarOpen" class="sidebar-backdrop" @click="toggleSidebar" />
+    </template>
 
-    <div v-if="sidebarOpen" class="sidebar-backdrop" @click="toggleSidebar" />
+    <div class="main-container" :class="{ 'main-container--landing': esLanding }">
+      <TopBar v-if="!esLanding" @toggle-sidebar="toggleSidebar" />
 
-    <div class="main-container">
-      <TopBar @toggle-sidebar="toggleSidebar" />
-
-      <main class="content-view">
+      <main class="content-view" :class="{ 'content-view--landing': esLanding }">
         <router-view />
       </main>
     </div>
@@ -15,11 +16,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import SideBar from './components/layout/SideBar.vue'
 import TopBar from './components/layout/TopBar.vue'
 
+const route = useRoute()
 const sidebarOpen = ref(false)
+
+const esLanding = computed(() => route.name === 'landing')
 
 function toggleSidebar() {
   sidebarOpen.value = !sidebarOpen.value
@@ -51,6 +56,19 @@ function toggleSidebar() {
 
 .sidebar-backdrop {
   display: none;
+}
+
+.app-shell--landing {
+  overflow: hidden;
+}
+
+.main-container--landing {
+  overflow: hidden;
+}
+
+.content-view--landing {
+  padding: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
