@@ -1,29 +1,9 @@
-<!-- 
-  DiccionarioView.vue
-  
-  Vista principal para mostrar un diccionario interactivo de palabras chilenas.
-  Permite a los usuarios buscar, filtrar por categoría y explorar chilenismos
-  con sus significados y ejemplos de uso.
-  
-  Componentes utilizados:
-  - Search (lucide-vue-next): Icono para la búsqueda
-  - Send (lucide-vue-next): Icono para sugerir nuevas palabras
-  
-  Funcionalidades:
-  - Búsqueda de palabras
-  - Filtrado por categorías (TODO, AMIGOS, TRABAJO, CALLE, COMIDA)
-  - Grid responsive de tarjetas con palabras
-  - Banner para sugerir nuevas palabras
--->
 <template>
   <div class="diccionario-container">
-    
-    <!-- Encabezado con título principal -->
     <header class="view-header">
       <h1 class="title">DICCIONARIO DE CHILENISMOS</h1>
     </header>
 
-    <!-- Barra de búsqueda -->
     <div class="search-wrapper">
       <Search class="search-icon" :size="20" />
       <input
@@ -35,7 +15,6 @@
       />
     </div>
 
-    <!-- Filtros por categoría -->
     <div class="filters-container">
       <button
         v-for="cat in store.categorias"
@@ -47,10 +26,13 @@
       </button>
     </div>
 
-    <!-- Grid de tarjetas -->
-    <div v-if="store.loading" class="loading-state">Cargando...</div>
-    <div v-else class="words-grid">
-      <article v-for="item in store.palabras" :key="item.id" class="word-card">
+    <div v-if="store.loading" class="loading-state">
+      <div class="loading-spinner" />
+      <p>Cargando palabras...</p>
+    </div>
+
+    <TransitionGroup v-else name="card-enter" tag="div" class="words-grid">
+      <article v-for="(item, idx) in store.palabras" :key="item.id" class="word-card" :style="{ '--card-delay': idx * 0.04 + 's' }">
         <h2 class="word-title">{{ item.palabra }}</h2>
         <div class="section-label">SIGNIFICADO</div>
         <p class="word-meaning">{{ item.traduccion }}</p>
@@ -59,9 +41,8 @@
           <p class="word-example">{{ item.ejemplo_uso }}</p>
         </div>
       </article>
-    </div>
+    </TransitionGroup>
 
-    <!-- Banner inferior con CTA para sugerir nuevas palabras -->
     <div class="bottom-banner">
       <div class="banner-content">
         <h3>¿FALTA ALGO?</h3>
@@ -72,7 +53,6 @@
         SUGERIR PALABRA
       </button>
     </div>
-
   </div>
 </template>
 
@@ -107,9 +87,19 @@ function buscar() {
 </script>
 
 <style scoped>
-/* =====================================================
-   ESTRUCTURA PRINCIPAL
-   ===================================================== */
+@keyframes viewFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardFadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 .diccionario-container {
   max-width: 1000px;
@@ -118,13 +108,15 @@ function buscar() {
   flex-direction: column;
   gap: 1.5rem;
   padding-bottom: 2rem;
+  animation: viewFadeIn 0.5s ease both;
 }
 
-/* =====================================================
-   ENCABEZADO Y TÍTULO
-   ===================================================== */
+/* ===== Encabezado ===== */
+.view-header {
+  border-left: 6px solid var(--brand-accent);
+  padding-left: 1.5rem;
+}
 
-/* Título principal del diccionario */
 .view-header .title {
   font-size: 2.5rem;
   font-weight: 900;
@@ -133,25 +125,30 @@ function buscar() {
   margin-bottom: 0.5rem;
 }
 
-/* =====================================================
-   BARRA DE BÚSQUEDA
-   ===================================================== */
-
+/* ===== Búsqueda ===== */
 .search-wrapper {
   background-color: #ffffff;
+  border: 1px solid var(--border-color, #e2e5dc);
   border-radius: 8px;
   display: flex;
   align-items: center;
   padding: 0 1rem;
   height: 54px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   width: 100%;
   max-width: 600px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-wrapper:focus-within {
+  border-color: var(--brand-dark);
+  box-shadow: 0 0 0 3px rgba(45, 51, 34, 0.08);
 }
 
 .search-icon {
   color: var(--text-muted);
   margin-right: 0.75rem;
+  flex-shrink: 0;
 }
 
 .search-input {
@@ -164,10 +161,7 @@ function buscar() {
   outline: none;
 }
 
-/* =====================================================
-   FILTROS POR CATEGORÍA
-   ===================================================== */
-
+/* ===== Filtros ===== */
 .filters-container {
   display: flex;
   gap: 0.75rem;
@@ -177,9 +171,9 @@ function buscar() {
 }
 
 .filter-btn {
-  background-color: #eef1e8; 
+  background-color: rgba(var(--brand-note-rgb), 0.08);
   color: var(--text-muted);
-  border: none;
+  border: 1px solid transparent;
   padding: 0.5rem 1.2rem;
   border-radius: 6px;
   font-weight: 700;
@@ -189,36 +183,75 @@ function buscar() {
 }
 
 .filter-btn:hover {
-  background-color: #e2e8d5;
+  background-color: rgba(var(--brand-note-rgb), 0.15);
+  border-color: rgba(var(--brand-note-rgb), 0.2);
 }
 
 .filter-btn.active {
-  background-color: var(--brand-tag); 
-  color: #a45a41; 
+  background-color: var(--brand-accent);
+  color: #fff;
+  border-color: transparent;
 }
 
-/* =====================================================
-   GRID DE PALABRAS Y TARJETAS
-   ===================================================== */
+/* ===== Estados ===== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
 
-/* Layout de 3 columnas para las tarjetas de palabras */
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-color, #e2e5dc);
+  border-top-color: var(--brand-dark);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ===== TransitionGroup: entrada escalonada ===== */
+.card-enter-enter-active {
+  animation: cardFadeSlideUp 0.35s ease both;
+  animation-delay: var(--card-delay, 0s);
+}
+
+.card-enter-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.card-enter-enter-from,
+.card-enter-leave-to {
+  opacity: 0;
+}
+
+/* ===== Grid de palabras ===== */
 .words-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
-/* Tarjeta individual con información de una palabra */
 .word-card {
   background-color: #ffffff;
+  border: 1px solid var(--border-color, #e2e5dc);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
-/* Nombre de la palabra -->
+.word-card:hover {
+  box-shadow: 0 6px 20px rgba(45, 51, 34, 0.08);
+  transform: translateY(-2px);
+  border-color: var(--brand-dark);
+}
+
 .word-title {
   font-size: 1.5rem;
   font-weight: 800;
@@ -226,7 +259,6 @@ function buscar() {
   margin-bottom: 1rem;
 }
 
-/* Etiqueta para secciones (SIGNIFICADO, EJEMPLO) */
 .section-label {
   font-size: 0.7rem;
   font-weight: 700;
@@ -241,10 +273,9 @@ function buscar() {
   color: #111;
   line-height: 1.4;
   margin-bottom: 1.5rem;
-  flex-grow: 1; 
+  flex-grow: 1;
 }
 
-/* Caja contenedora del ejemplo */
 .example-box {
   background-color: var(--brand-card-inner);
   padding: 1rem;
@@ -258,15 +289,9 @@ function buscar() {
   margin-top: 0.2rem;
 }
 
-/* 
-   *
-   BANNER INFERIOR - CTA PARA SUGERIR PALABRAS
-    *
-    */
-
-/* Banner con llamada a la acción para sugerir palabras nuevas */
+/* ===== Banner inferior ===== */
 .bottom-banner {
-  background-color: #ccd4be;
+  background: linear-gradient(135deg, #ccd4be 0%, #b8c4a8 100%);
   border-radius: 12px;
   padding: 2rem 3rem;
   margin-top: 2rem;
@@ -275,6 +300,12 @@ function buscar() {
   align-items: center;
   position: relative;
   overflow: hidden;
+  transition: box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.bottom-banner:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
 
 .banner-content h3 {
@@ -290,7 +321,7 @@ function buscar() {
 }
 
 .suggest-btn {
-  background-color: #c4a495; 
+  background-color: var(--brand-accent);
   color: #ffffff;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -301,26 +332,23 @@ function buscar() {
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  transition: opacity 0.2s;
-  z-index: 1; 
+  transition: background-color 0.2s, box-shadow 0.2s;
+  z-index: 1;
+  flex-shrink: 0;
 }
 
 .suggest-btn:hover {
-  opacity: 0.9;
+  background-color: #3d4f30;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* =====================================================
-   DISEÑO RESPONSIVO
-   ===================================================== */
-
-/* Tablets: cambiar a 2 columnas */
+/* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .words-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Móviles: cambiar a 1 columna */
 @media (max-width: 768px) {
   .words-grid {
     grid-template-columns: 1fr;
