@@ -1,2 +1,6 @@
 .opencode/
 opencode.json
+__pycache__/
+venv/
+*.pyc
+.env
