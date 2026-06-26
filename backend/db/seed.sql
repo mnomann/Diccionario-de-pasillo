@@ -355,7 +355,97 @@ INSERT INTO frase (escenario_id, frase_original, traduccion, explicacion, tono, 
      2, 0, 0,
      'Esperando resultados: "Estoy cuatico con los examenes, no he podido dormir bien."');
 
--- 4. Frase-Palabra (relaciones N:M) -----------------------------------------
+-- 4. Conversaciones ----------------------------------------------------------
+INSERT INTO conversacion (frase_id, participantes) VALUES
+    (1, '["Pedro", "Ana"]'),
+    (2, '["Pedro", "Ana"]'),
+    (3, '["Pedro", "Ana"]'),
+    (4, '["Pedro", "Ana"]'),
+    (5, '["Pedro", "Ana"]'),
+    (6, '["Pedro", "Ana"]'),
+    (7, '["Pedro", "Ana"]'),
+    (8, '["Pedro", "Ana"]'),
+    (9, '["Pedro", "Ana"]'),
+    (10, '["Pedro", "Ana"]'),
+    (11, '["Pedro", "Ana"]'),
+    (12, '["Pedro", "Ana"]'),
+    (13, '["Pedro", "Ana"]'),
+    (14, '["Pedro", "Ana"]');
+
+INSERT INTO mensaje (conversacion_id, emisor, texto, es_modismo, orden) VALUES
+    -- Frase 1: ¿Cachai lo que te digo?
+    (1, 'Pedro', 'Oye, tengo un problema con el trabajo. Mi jefe me pidió hacer tres informes en un día, no me alcanza el tiempo.', FALSE, 1),
+    (1, 'Ana', 'Te entiendo completamente. Pero organizándote bien deberías poder, ¿cachai lo que te digo?', TRUE, 2),
+    (1, 'Pedro', 'Sí, sé que me estás diciendo que me organice. Tienes razón.', FALSE, 3),
+    (1, 'Ana', 'Eso mismo. Es como decir "¿entiendes? pero con un toque más amistoso.', FALSE, 4),
+    -- Frase 2: Estaba brigida la wea
+    (2, 'Pedro', 'Anoche vi una pelea en la calle entre dos conductores, casi llegan a los golpes.', FALSE, 1),
+    (2, 'Ana', 'No me digas. ¿Y cómo terminó?', FALSE, 2),
+    (2, 'Pedro', 'Tuvieron que separarlos los vecinos. Estaba brigida la wea, parecía película de acción.', TRUE, 3),
+    (2, 'Ana', 'Qué heavy. Menos mal que no pasó a mayores.', FALSE, 4),
+    -- Frase 3: Me tinca que va a llegar tarde
+    (3, 'Ana', '¿A qué hora quedamos con la gente?', FALSE, 1),
+    (3, 'Pedro', 'A las 8, pero son las 7:45 y Juan todavía no responde los mensajes.', FALSE, 2),
+    (3, 'Ana', 'Si conozco a Juan, me tinca que va a llegar tarde como siempre.', TRUE, 3),
+    (3, 'Pedro', 'Jaja, probablemente. Mejor le decimos que es a las 7:30 para que llegue a las 8.', FALSE, 4),
+    -- Frase 4: Bacan el carrete de anoche
+    (4, 'Pedro', '¡Hola! ¿Cómo amaneciste?', FALSE, 1),
+    (4, 'Ana', 'Con algo de sueño pero feliz. Bacan el carrete de anoche, estuvo increíble.', TRUE, 2),
+    (4, 'Pedro', 'Sí, la música estuvo genial y la gente muy buena onda.', FALSE, 3),
+    (4, 'Ana', 'Totalmente. Deberíamos repetir el próximo fin de semana.', FALSE, 4),
+    -- Frase 5: Vamos a carretear este finde
+    (5, 'Pedro', 'Esta semana ha sido demasiado estresante.', FALSE, 1),
+    (5, 'Ana', 'Sí, necesitamos despejarnos. Vamos a carretear este finde, conozco un lugar nuevo.', TRUE, 2),
+    (5, 'Pedro', 'Buena idea. ¿Invito a los demás del trabajo?', FALSE, 3),
+    (5, 'Ana', 'Claro, mientras más mejor. La idea es relajarse y pasarlo bien.', FALSE, 4),
+    -- Frase 6: Estoy chato de esta pega
+    (6, 'Pedro', 'Llevo meses haciendo horas extras y no me pagan ni un bono.', FALSE, 1),
+    (6, 'Ana', 'Está heavy. ¿Has hablado con recursos humanos?', FALSE, 2),
+    (6, 'Pedro', 'Ya hablé mil veces y nada. Estoy chato de esta pega, de verdad.', TRUE, 3),
+    (6, 'Ana', 'Te entiendo. Pero antes de renunciar, busca otra cosa primero.', FALSE, 4),
+    -- Frase 7: Aperrando no mas
+    (7, 'Ana', '¿Cómo va el proyecto nuevo?', FALSE, 1),
+    (7, 'Pedro', 'Difícil, pero hay que seguir adelante. Aperrando no mas, como dicen acá.', TRUE, 2),
+    (7, 'Ana', 'Esa es la actitud. Tú dale que al final siempre se logra.', FALSE, 3),
+    (7, 'Pedro', 'Sí, es cosa de no rendirse. Además ya queda poco para terminar.', FALSE, 4),
+    -- Frase 8: El jefe esta puro webiando
+    (8, 'Pedro', 'Llevamos tres semanas esperando que apruebe el diseño.', FALSE, 1),
+    (8, 'Ana', '¿Y qué dice cuando le preguntan?', FALSE, 2),
+    (8, 'Pedro', 'Que lo está revisando, pero no hace nada. El jefe esta puro webiando con el proyecto.', TRUE, 3),
+    (8, 'Ana', 'Clásico. A veces parece que no le importa el tiempo de los demás.', FALSE, 4),
+    -- Frase 9: No seai leso, abrigate
+    (9, 'Ana', '¿Ya viste el clima para hoy? Va a estar helado.', FALSE, 1),
+    (9, 'Pedro', 'Sí, pero no creo que haga tanto frío.', FALSE, 2),
+    (9, 'Ana', 'No seai leso, abrigate bien que te resfrías.', TRUE, 3),
+    (9, 'Pedro', 'Ya mamá... digo, Ana. Está bien, me llevaré la chaqueta.', FALSE, 4),
+    -- Frase 10: Puro webiando todo el dia
+    (10, 'Ana', '¿Hiciste las cosas que te pedí hoy?', FALSE, 1),
+    (10, 'Pedro', 'Eh... estuve ocupado con otras cosas.', FALSE, 2),
+    (10, 'Ana', 'O sea que puro webiando todo el dia, como siempre.', TRUE, 3),
+    (10, 'Pedro', 'Jaja, no es tan así. Pero tienes razón, mañana las hago sin falta.', FALSE, 4),
+    -- Frase 11: Estoy dando jugo
+    (11, 'Pedro', 'Mañana tengo la entrevista para el puesto nuevo.', FALSE, 1),
+    (11, 'Ana', '¡Qué bien! Vas a estar nervioso seguramente.', FALSE, 2),
+    (11, 'Pedro', 'Demasiado. Estoy dando jugo con esto, no puedo ni dormir bien.', TRUE, 3),
+    (11, 'Ana', 'Respira hondo y sé tú mismo. Estás bien preparado.', FALSE, 4),
+    -- Frase 12: Echar la talla en la entrevista
+    (12, 'Ana', '¿Al final cómo te fue en la entrevista?', FALSE, 1),
+    (12, 'Pedro', 'Bien creo. Estaba muy serio el ambiente así que decidí echar la talla en la entrevista.', TRUE, 2),
+    (12, 'Ana', '¿Y qué pasó? ¿Se rieron?', FALSE, 3),
+    (12, 'Pedro', 'Sí, el entrevistador se relajó y la conversación fluyó mejor.', FALSE, 4),
+    -- Frase 13: Me duele la guata
+    (13, 'Pedro', 'No sé qué comería anoche pero desperté pésimo.', FALSE, 1),
+    (13, 'Ana', '¿Qué tienes? ¿Fiebre?', FALSE, 2),
+    (13, 'Pedro', 'No, pero me duele la guata y no puedo ni levantarme.', TRUE, 3),
+    (13, 'Ana', 'Anda al médico mejor, por si acaso.', FALSE, 4),
+    -- Frase 14: Estoy cuatico con los examenes
+    (14, 'Ana', '¿Ya viste los resultados de los exámenes que te hiciste?', FALSE, 1),
+    (14, 'Pedro', 'Todavía no, los espero mañana. Estoy cuatico con los examenes, no he dormido bien.', TRUE, 2),
+    (14, 'Ana', 'Entiendo la ansiedad. Pero seguro que todo estará bien.', FALSE, 3),
+    (14, 'Pedro', 'Eso espero. Gracias por preocuparte.', FALSE, 4);
+
+
+-- 5. Frase-Palabra (relaciones N:M) -----------------------------------------
 INSERT INTO frase_palabra (frase_id, palabra_id, relevancia) VALUES
     -- "Cachai lo que te digo?" -> cachai
     (1, 4, 5),

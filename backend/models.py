@@ -254,6 +254,61 @@ class Escenario(Base):
 
 
 # ============================================================================
+# Conversacion
+# ============================================================================
+
+class Conversacion(Base):
+    __tablename__ = "conversacion"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    frase_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("frase.id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
+    participantes: Mapped[Optional[list[Any]]] = mapped_column(
+        JSON, default=list, server_default="'[]'::jsonb"
+    )
+
+    # Relationships
+    frase: Mapped["Frase"] = relationship(back_populates="conversacion")
+    mensajes: Mapped[list["Mensaje"]] = relationship(
+        "Mensaje", back_populates="conversacion",
+        cascade="all, delete-orphan",
+        order_by="Mensaje.orden",
+    )
+
+    def __repr__(self) -> str:
+        return f"<Conversacion(id={self.id}, frase_id={self.frase_id})>"
+
+
+class Mensaje(Base):
+    __tablename__ = "mensaje"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    conversacion_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("conversacion.id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
+    emisor: Mapped[str] = mapped_column(String(200), nullable=False)
+    texto: Mapped[str] = mapped_column(Text, nullable=False)
+    es_modismo: Mapped[Optional[bool]] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )
+    orden: Mapped[Optional[int]] = mapped_column(
+        Integer, default=0, server_default="0"
+    )
+
+    # Relationships
+    conversacion: Mapped["Conversacion"] = relationship(back_populates="mensajes")
+
+    def __repr__(self) -> str:
+        return f"<Mensaje(id={self.id}, orden={self.orden}, modismo={self.es_modismo})>"
+
+
+# ============================================================================
 # Frase
 # ============================================================================
 
@@ -308,6 +363,10 @@ class Frase(Base):
     escenario: Mapped["Escenario"] = relationship("Escenario", back_populates="frases")
     palabras_relacion: Mapped[list["FrasePalabra"]] = relationship(
         "FrasePalabra", back_populates="frase"
+    )
+    conversacion: Mapped[Optional["Conversacion"]] = relationship(
+        "Conversacion", back_populates="frase",
+        cascade="all, delete-orphan",
     )
 
     @property
