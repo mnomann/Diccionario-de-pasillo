@@ -19,12 +19,10 @@ logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Configurar Gemini SDK
-# ---------------------------------------------------------------------------
 genai.configure(api_key=settings.GOOGLE_API_KEY)
 
 # ---------------------------------------------------------------------------
 # Prompt del sistema (System Instruction)
-# ---------------------------------------------------------------------------
 SYSTEM_INSTRUCTION = (
     "Eres un traductor de lenguaje chileno. Tu objetivo es explicar modismos, "
     "ironia y sarcasmo a personas que necesitan respuestas muy literales.\n"
@@ -70,9 +68,13 @@ def _construir_mensaje_usuario(request: TraduccionRequest) -> str:
 
 
 def _parsear_respuesta_ia(texto: str) -> dict[str, Any]:
-    """Intenta extraer un diccionario desde la respuesta de la IA."""
+    """Intenta extraer un diccionario desde la respuesta de la IA.
+
+    La respuesta puede venir como JSON puro o envuelto en bloques ```json ```.
+    """
     contenido = texto.strip()
 
+    # Intentar extraer de bloque de codigo Markdown
     if contenido.startswith("```"):
         lineas = contenido.splitlines()
         lineas_filtradas = [
@@ -93,6 +95,7 @@ def _transformar_respuesta(
     modismos_detectados: list[str] = datos_ia.get("modismos_detectados", [])
     explicacion_social = datos_ia.get("explicacion_social", "")
 
+    # -- componentes --
     componentes: list[ComponenteToken] = []
     for modismo in modismos_detectados:
         componentes.append(
@@ -104,6 +107,7 @@ def _transformar_respuesta(
             )
         )
 
+    # -- analisis --
     nivel_ironia = 8.0 if es_ironico else 0.0
     analisis = AnalisisCompleto(
         tono="informal",
@@ -114,6 +118,7 @@ def _transformar_respuesta(
         requiere_contexto_adicional=False,
     )
 
+    # -- confianza --
     confianza = 0.70 if es_ironico else 0.85
 
     return TraduccionResponse(
@@ -129,13 +134,17 @@ def _transformar_respuesta(
 
 
 async def traducir_frase(request: TraduccionRequest) -> TraduccionResponse:
-    """Envia la frase a Gemini y retorna la traduccion estructurada."""
+    """Envia la frase a Gemini y retorna la traduccion estructurada.
+
+    Este metodo es marcado como ``async`` para que FastAPI pueda invocarlo
+    sin bloquear el event loop, aunque internamente usa el SDK sincrono de
+    Gemini ejecutado en un thread pool.
+    """
     logger.info(
-        "Solicitando traduccion para frase=%s contexto_id=%s contexto_nombre=%s contexto_personalizado=%s",
+        "Solicitando traduccion para frase=%s contexto_id=%s contexto_nombre=%s",
         request.frase,
         request.contexto_id,
         request.contexto_nombre,
-        request.contexto_personalizado,
     )
 
     modelo = genai.GenerativeModel(

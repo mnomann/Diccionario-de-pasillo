@@ -1,7 +1,9 @@
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database import get_db
 from app.schemas.comun import ErrorResponse
 from app.schemas.traduccion import TraduccionRequest, TraduccionResponse
 from app.services.traduccion_service import traducir_frase
@@ -20,10 +22,11 @@ router = APIRouter(prefix="/traducciones", tags=["Traducciones"])
 )
 async def traducir(
     request: TraduccionRequest,
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """Traduce una frase chilena a lenguaje neutral usando IA.
 
-    Recibe una frase (obligatorio) y opcionalmente un contexto.
+    Recibe una frase (obligatorio) y opcionalmente un contexto (por ID o nombre).
     Devuelve la traduccion, desglose por componentes, analisis de tono/ironia
     y nivel de confianza.
     """
