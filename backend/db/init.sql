@@ -151,7 +151,30 @@ CREATE TABLE IF NOT EXISTS frase (
     fecha_actualizacion TIMESTAMPTZ     DEFAULT NULL
 );
 
--- 2.5. Sugerencia
+-- 2.5. Conversacion
+CREATE TABLE IF NOT EXISTS conversacion (
+    id              SERIAL          PRIMARY KEY,
+    frase_id        INTEGER         NOT NULL UNIQUE
+                                    REFERENCES frase(id)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE,
+    participantes   JSONB           DEFAULT '[]'::jsonb NOT NULL
+);
+
+-- 2.6. Mensaje
+CREATE TABLE IF NOT EXISTS mensaje (
+    id              SERIAL          PRIMARY KEY,
+    conversacion_id INTEGER         NOT NULL
+                                    REFERENCES conversacion(id)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE,
+    emisor          VARCHAR(200)    NOT NULL,
+    texto           TEXT            NOT NULL,
+    es_modismo      BOOLEAN         DEFAULT FALSE NOT NULL,
+    orden           INTEGER         DEFAULT 0 NOT NULL
+);
+
+-- 2.7. Sugerencia
 CREATE TABLE IF NOT EXISTS sugerencia (
     id                  SERIAL              PRIMARY KEY,
     usuario_id          INTEGER             DEFAULT NULL
@@ -167,7 +190,7 @@ CREATE TABLE IF NOT EXISTS sugerencia (
     fecha_actualizacion TIMESTAMPTZ         DEFAULT NULL
 );
 
--- 2.6. Tabla intermedia: Frase <-> Palabra (relacion N:M opcional)
+-- 2.8. Tabla intermedia: Frase <-> Palabra (relacion N:M opcional)
 CREATE TABLE IF NOT EXISTS frase_palabra (
     id                  SERIAL      PRIMARY KEY,
     frase_id            INTEGER     NOT NULL
@@ -257,6 +280,13 @@ CREATE INDEX IF NOT EXISTS idx_frase_tono
     ON frase (tono)
     WHERE tono IS NOT NULL;
 
+-- 3.6. Indices para conversacion y mensaje
+CREATE INDEX IF NOT EXISTS idx_conversacion_frase
+    ON conversacion (frase_id);
+
+CREATE INDEX IF NOT EXISTS idx_mensaje_conversacion
+    ON mensaje (conversacion_id);
+
 -- 4. Funciones y Triggers ----------------------------------------------------
 
 -- 4.1. Trigger para actualizar fecha_actualizacion automaticamente
@@ -326,3 +356,10 @@ COMMENT ON TABLE sugerencia IS 'Sugerencias de usuarios para nuevas palabras, fr
 COMMENT ON COLUMN sugerencia.contenido IS 'JSON con los datos de la sugerencia segun el tipo';
 
 COMMENT ON TABLE frase_palabra IS 'Relacion N:M entre frases y palabras (uso futuro con ML)';
+
+COMMENT ON TABLE conversacion IS 'Conversaciones de ejemplo asociadas a cada frase';
+COMMENT ON COLUMN conversacion.participantes IS 'JSON array de nombres de participantes en la conversacion';
+
+COMMENT ON TABLE mensaje IS 'Mensajes individuales dentro de una conversacion de ejemplo';
+COMMENT ON COLUMN mensaje.es_modismo IS 'Indica si este mensaje contiene un modismo que se esta ejemplificando';
+COMMENT ON COLUMN mensaje.orden IS 'Orden del mensaje dentro de la conversacion';
