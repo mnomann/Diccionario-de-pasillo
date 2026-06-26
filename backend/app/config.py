@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    GOOGLE_API_KEY: str = ""
+    GOOGLE_MODEL: str = "gemini-3.1-flash-lite"
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",

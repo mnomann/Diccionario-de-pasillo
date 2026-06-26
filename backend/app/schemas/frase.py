@@ -14,21 +14,6 @@ class EscenarioResumen(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class MensajeSchema(BaseModel):
-    emisor: str
-    texto: str
-    es_modismo: bool
-
-    model_config = {"from_attributes": True}
-
-
-class ConversacionSchema(BaseModel):
-    participantes: list[str]
-    mensajes: list[MensajeSchema]
-
-    model_config = {"from_attributes": True}
-
-
 class FraseList(BaseModel):
     id: int
     frase_original: str
@@ -58,7 +43,6 @@ class FraseDetail(BaseModel):
     activo: bool
     fecha_creacion: datetime.datetime
     fecha_actualizacion: Optional[datetime.datetime] = None
-    conversacion: Optional[ConversacionSchema] = None
 
     model_config = {"from_attributes": True}
 

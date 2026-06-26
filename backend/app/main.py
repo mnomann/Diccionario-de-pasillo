@@ -13,6 +13,7 @@ from app.routers import (
     frases_router,
     palabras_router,
     sugerencias_router,
+    traducciones_router,
     usuarios_router,
 )
 from app.schemas.comun import ErrorResponse
@@ -28,7 +29,6 @@ app = FastAPI(
 
 # ---------------------------------------------------------------------------
 # CORS
-# ---------------------------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,7 +39,6 @@ app.add_middleware(
 
 # ---------------------------------------------------------------------------
 # Routers
-# ---------------------------------------------------------------------------
 API_PREFIX = "/api/v1"
 
 app.include_router(auth_router, prefix=API_PREFIX)
@@ -47,12 +46,12 @@ app.include_router(palabras_router, prefix=API_PREFIX)
 app.include_router(frases_router, prefix=API_PREFIX)
 app.include_router(escenarios_router, prefix=API_PREFIX)
 app.include_router(sugerencias_router, prefix=API_PREFIX)
+app.include_router(traducciones_router, prefix=API_PREFIX)
 app.include_router(usuarios_router, prefix=API_PREFIX)
 
 
 # ---------------------------------------------------------------------------
 # Manejadores de errores globales
-# ---------------------------------------------------------------------------
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(
@@ -143,7 +142,6 @@ async def sqlalchemy_error_handler(request: Request, exc: SQLAlchemyError) -> JS
 
 # ---------------------------------------------------------------------------
 # Eventos de ciclo de vida
-# ---------------------------------------------------------------------------
 @app.on_event("startup")
 async def on_startup() -> None:
     """Inicializa la conexion a la base de datos."""
@@ -163,7 +161,6 @@ async def on_shutdown() -> None:
 
 # ---------------------------------------------------------------------------
 # Health check
-# ---------------------------------------------------------------------------
 @app.get("/health", tags=["Health"])
 async def health_check() -> dict[str, Any]:
     return {"status": "ok", "version": "1.0.0"}
