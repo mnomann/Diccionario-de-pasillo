@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 if TYPE_CHECKING:
+    from app.models.conversacion import Conversacion
     from app.models.escenario import Escenario
 
 
@@ -42,6 +43,11 @@ class Frase(Base):
     escenario: Mapped[Optional["Escenario"]] = relationship(
         "Escenario",
         back_populates="frases",
+    )
+    conversacion: Mapped[Optional["Conversacion"]] = relationship(
+        "Conversacion",
+        back_populates="frase",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:
