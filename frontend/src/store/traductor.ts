@@ -1,15 +1,21 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api } from '../services/api'
-import type { PalabraList, FraseList, PaginatedPalabras, PaginatedFrases } from '../types'
+import type { TraduccionRequest, TraduccionResponse } from '../types'
 
-interface TraduccionResultado {
+export interface TraduccionResultado {
   fraseOriginal: string
-  significadoLiteral: string
-  usoComun: string
-  nota: string
-  nivelIronia: 'Bajo' | 'Medio' | 'Alto'
-  etiquetas: string[]
+  traduccion: string | null
+  contextoDetectado: { id: number; nombre: string; confianza: number } | null
+  componentes: Array<{ token: string; traduccion: string; tipo: string; nivelFormalidad: number }>
+  tono: string
+  intencionReal: string
+  nivelIronia: number
+  nivelSarcasmo: number
+  nivelFormalidad: number
+  confianza: number
+  alternativas: Array<{ traduccion: string; contexto: string; confianza: number }>
+  requiereContextoAdicional: boolean
 }
 
 export const useTraductorStore = defineStore('traductor', () => {
@@ -17,12 +23,34 @@ export const useTraductorStore = defineStore('traductor', () => {
   const resultado = ref<TraduccionResultado | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const usandoMock = ref(true)
 
-  function determinarIronia(nivel: number): 'Bajo' | 'Medio' | 'Alto' {
-    if (nivel <= 3) return 'Bajo'
-    if (nivel <= 6) return 'Medio'
-    return 'Alto'
+  // Contexto opcional
+  const contextoId = ref<number | null>(null)
+  const contextoNombre = ref<string | null>(null)
+  const contextoPersonalizado = ref<string | null>(null)
+
+  function setContextoId(id: number | null) {
+    contextoId.value = id
+    contextoNombre.value = null
+    contextoPersonalizado.value = null
+  }
+
+  function setContextoNombre(nombre: string | null) {
+    contextoNombre.value = nombre
+    contextoId.value = null
+    contextoPersonalizado.value = null
+  }
+
+  function setContextoPersonalizado(texto: string | null) {
+    contextoPersonalizado.value = texto
+    contextoId.value = null
+    contextoNombre.value = null
+  }
+
+  function limpiarContexto() {
+    contextoId.value = null
+    contextoNombre.value = null
+    contextoPersonalizado.value = null
   }
 
   async function traducir(texto: string) {
@@ -31,43 +59,41 @@ export const useTraductorStore = defineStore('traductor', () => {
     error.value = null
     resultado.value = null
 
-    try {
-      const res = await api.get<PaginatedPalabras>('/palabras', {
-        buscar: texto,
-        tamanio: 1,
-      })
+    const body: TraduccionRequest = {
+      frase: texto,
+      contexto_id: contextoId.value,
+      contexto_nombre: contextoNombre.value,
+      contexto_personalizado: contextoPersonalizado.value,
+    }
 
-      if (res.data.length > 0) {
-        const p = res.data[0]
-        resultado.value = {
-          fraseOriginal: p.palabra,
-          significadoLiteral: p.traduccion,
-          usoComun: `"${p.ejemplo_uso || p.traduccion}"`,
-          nota: `Categoría: ${p.categoria}. Nivel de formalidad: ${p.nivel_formalidad}/10.`,
-          nivelIronia: determinarIronia(p.nivel_ironia),
-          etiquetas: [p.categoria],
-        }
-        usandoMock.value = false
-      } else {
-        const fraseRes = await api.get<PaginatedFrases>('/frases', {
-          buscar: texto,
-          tamanio: 1,
-        })
-        if (fraseRes.data.length > 0) {
-          const f = fraseRes.data[0]
-          resultado.value = {
-            fraseOriginal: f.frase_original,
-            significadoLiteral: f.traduccion,
-            usoComun: f.escenario?.nombre || '',
-            nota: `Tono: ${f.tono || 'neutro'}. Formalidad: ${f.nivel_formalidad}/10.`,
-            nivelIronia: determinarIronia(f.nivel_ironia),
-            etiquetas: [f.tono || 'neutro'].filter(Boolean),
-          }
-          usandoMock.value = false
-        }
+    try {
+      const res = await api.post<TraduccionResponse>('/traducciones/traducir', body)
+
+      resultado.value = {
+        fraseOriginal: res.frase_original,
+        traduccion: res.traduccion,
+        contextoDetectado: res.contexto_detectado,
+        componentes: res.componentes.map(c => ({
+          token: c.token,
+          traduccion: c.traduccion,
+          tipo: c.tipo,
+          nivelFormalidad: c.nivel_formalidad,
+        })),
+        tono: res.analisis?.tono || '',
+        intencionReal: res.analisis?.intencion_real || '',
+        nivelIronia: res.analisis?.nivel_ironia || 0,
+        nivelSarcasmo: res.analisis?.nivel_sarcasmo || 0,
+        nivelFormalidad: res.analisis?.nivel_formalidad_general || 0,
+        confianza: res.confianza,
+        alternativas: res.alternativas.map(a => ({
+          traduccion: a.traduccion,
+          contexto: a.contexto,
+          confianza: a.confianza,
+        })),
+        requiereContextoAdicional: res.analisis?.requiere_contexto_adicional || false,
       }
-    } catch {
-      // No hay datos mock para el traductor
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Error al traducir la frase'
     } finally {
       loading.value = false
     }
@@ -78,7 +104,13 @@ export const useTraductorStore = defineStore('traductor', () => {
     resultado,
     loading,
     error,
-    usandoMock,
+    contextoId,
+    contextoNombre,
+    contextoPersonalizado,
+    setContextoId,
+    setContextoNombre,
+    setContextoPersonalizado,
+    limpiarContexto,
     traducir,
   }
 })

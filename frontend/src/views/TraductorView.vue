@@ -5,27 +5,81 @@
       <p class="subtitle">Introduce una frase para entender su contexto real.</p>
     </header>
 
+    <!-- Busqueda -->
     <div class="search-bar-container">
       <div class="search-input-wrapper">
         <input
           class="search-input"
           type="text"
-          v-model="store.query"
+          v-model="query"
           placeholder="Ej: Estoy pato"
           @keyup.enter="buscar"
         />
       </div>
       <button class="translate-btn" @click="buscar" :disabled="store.loading">
         <Languages :size="18" />
-        {{ store.loading ? 'BUSCANDO...' : 'TRADUCIR' }}
+        {{ store.loading ? 'TRADUCIENDO...' : 'TRADUCIR' }}
       </button>
     </div>
 
-    <div v-if="store.loading" class="loading-state">
-      <div class="loading-spinner" />
-      <p>Buscando...</p>
+    <!-- Contexto opcional -->
+    <div class="context-section">
+      <button class="context-toggle" @click="showContext = !showContext">
+        <MessageSquarePlus :size="16" />
+        {{ showContext ? 'OCULTAR CONTEXTO' : 'AGREGAR CONTEXTO' }}
+      </button>
+
+      <transition name="slide">
+        <div v-if="showContext" class="context-panel">
+          <div class="context-tabs">
+            <button
+              :class="['tab', { active: contextMode === 'predef' }]"
+              @click="contextMode = 'predef'; store.setContextoPersonalizado(null)"
+            >
+              Contexto predefinido
+            </button>
+            <button
+              :class="['tab', { active: contextMode === 'custom' }]"
+              @click="contextMode = 'custom'; store.setContextoId(null); store.setContextoNombre(null)"
+            >
+              Escribe tu contexto
+            </button>
+          </div>
+
+          <div v-if="contextMode === 'predef'" class="context-predef">
+            <select v-model="selectedEscenario" @change="onEscenarioChange" class="context-select">
+              <option :value="null" disabled>Selecciona un contexto...</option>
+              <option v-for="esc in escenarios" :key="esc.id" :value="esc">
+                {{ esc.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <div v-if="contextMode === 'custom'" class="context-custom">
+            <textarea
+              v-model="customContextText"
+              @input="store.setContextoPersonalizado(customContextText)"
+              class="context-textarea"
+              placeholder="Describe la situacion en que se usa la frase..."
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+      </transition>
     </div>
 
+    <!-- Loading -->
+    <div v-if="store.loading" class="loading-state">
+      <div class="loading-spinner" />
+      <p>Analizando frase con IA...</p>
+    </div>
+
+    <!-- Error -->
+    <div v-if="store.error" class="error-state">
+      <p>{{ store.error }}</p>
+    </div>
+
+    <!-- Resultados -->
     <div v-if="store.resultado" class="results-layout">
       <transition name="result-enter">
         <div class="results-inner">
@@ -33,33 +87,71 @@
             <span class="card-label">FRASE ORIGINAL</span>
             <h1 class="phrase-text">"{{ store.resultado.fraseOriginal }}"</h1>
 
+            <!-- Traduccion -->
             <div class="inner-box">
               <div class="box-header">
                 <BookOpen :size="16" />
                 <h3>SIGNIFICADO LITERAL</h3>
               </div>
-              <p>{{ store.resultado.significadoLiteral }}</p>
+              <p>{{ store.resultado.traduccion }}</p>
             </div>
 
+            <!-- Componentes / Modismos detectados -->
+            <div v-if="store.resultado.componentes.length > 0" class="inner-box">
+              <div class="box-header">
+                <Tags :size="16" />
+                <h3>MODISMOS DETECTADOS</h3>
+              </div>
+              <div class="componentes-list">
+                <div v-for="c in store.resultado.componentes" :key="c.token" class="componente-item">
+                  <span class="comp-token">{{ c.token }}</span>
+                  <span class="comp-arrow">&rarr;</span>
+                  <span class="comp-trad">{{ c.traduccion || '?' }}</span>
+                  <span class="comp-tipo">{{ c.tipo }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Intencion real -->
             <div class="inner-box">
               <div class="box-header">
                 <MessageSquare :size="16" />
-                <h3>USO COMÚN</h3>
+                <h3>INTENCION REAL</h3>
               </div>
-              <p>{{ store.resultado.usoComun }}</p>
+              <p>{{ store.resultado.intencionReal }}</p>
 
-              <div class="dark-note">
+              <div v-if="store.resultado.requiereContextoAdicional" class="dark-note">
                 <Info :size="18" class="note-icon" />
-                <p>{{ store.resultado.nota }}</p>
+                <p>Esta frase necesita mas contexto para ser interpretada correctamente.</p>
+              </div>
+            </div>
+
+            <!-- Alternativas -->
+            <div v-if="store.resultado.alternativas.length > 0" class="inner-box">
+              <div class="box-header">
+                <GitCompare :size="16" />
+                <h3>TRADUCCIONES ALTERNATIVAS</h3>
+              </div>
+              <div v-for="(alt, i) in store.resultado.alternativas" :key="i" class="alternativa-item">
+                <p class="alt-trad">{{ alt.traduccion }}</p>
+                <p class="alt-ctx">{{ alt.contexto }} (confianza: {{ (alt.confianza * 100).toFixed(0) }}%)</p>
               </div>
             </div>
           </div>
 
           <aside class="side-info-column">
+            <!-- Contexto detectado -->
+            <div v-if="store.resultado.contextoDetectado" class="small-card">
+              <h3 class="card-title">CONTEXTO DETECTADO</h3>
+              <p class="context-name">{{ store.resultado.contextoDetectado.nombre }}</p>
+              <p class="context-confianza">Confianza: {{ (store.resultado.contextoDetectado.confianza * 100).toFixed(0) }}%</p>
+            </div>
+
+            <!-- Nivel de ironia -->
             <div class="small-card">
-              <h3 class="card-title">NIVEL DE IRONÍA</h3>
+              <h3 class="card-title">NIVEL DE IRONIA</h3>
               <div class="irony-row">
-                <span>{{ store.resultado.nivelIronia }}</span>
+                <span>{{ nivelIroniaTexto }}</span>
                 <div class="irony-bars">
                   <div class="bar" :class="ironiaClase(1)"></div>
                   <div class="bar" :class="ironiaClase(2)"></div>
@@ -68,17 +160,44 @@
               </div>
             </div>
 
+            <!-- Nivel de sarcasmo -->
             <div class="small-card">
-              <h3 class="card-title">ETIQUETAS</h3>
-              <div class="tags-container">
-                <span v-for="tag in store.resultado.etiquetas" :key="tag" class="tag">{{ tag }}</span>
+              <h3 class="card-title">NIVEL DE SARCASMO</h3>
+              <div class="irony-row">
+                <span>{{ nivelSarcasmoTexto }}</span>
+                <div class="irony-bars">
+                  <div class="bar" :class="sarcasmoClase(1)"></div>
+                  <div class="bar" :class="sarcasmoClase(2)"></div>
+                  <div class="bar" :class="sarcasmoClase(3)"></div>
+                </div>
               </div>
+            </div>
+
+            <!-- Nivel de formalidad -->
+            <div class="small-card">
+              <h3 class="card-title">FORMALIDAD</h3>
+              <div class="irony-row">
+                <span>{{ formalidadTexto }}</span>
+                <div class="irony-bars">
+                  <div class="bar" :class="formalidadClase(1)"></div>
+                  <div class="bar" :class="formalidadClase(2)"></div>
+                  <div class="bar" :class="formalidadClase(3)"></div>
+                  <div class="bar" :class="formalidadClase(4)"></div>
+                  <div class="bar" :class="formalidadClase(5)"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Confianza -->
+            <div class="small-card">
+              <h3 class="card-title">CONFIANZA</h3>
+              <p class="confianza-valor">{{ (store.resultado.confianza * 100).toFixed(0) }}%</p>
             </div>
 
             <router-link to="/escenarios" class="small-card link-card" style="text-decoration: none;">
               <div class="link-content">
                 <h3 class="card-title">APRENDER ESCENARIOS SOCIALES</h3>
-                <p>Ver ejemplos de cómo usar esta frase en la vida real.</p>
+                <p>Ver ejemplos de como usar esta frase en la vida real.</p>
               </div>
               <ArrowRight :size="20" />
             </router-link>
@@ -87,37 +206,299 @@
       </transition>
     </div>
 
-    <div v-else-if="store.query && !store.loading" class="no-results">
-      <p>No se encontraron resultados para "{{ store.query }}".</p>
+    <!-- Sin resultados -->
+    <div v-else-if="store.query && !store.loading && !store.error" class="no-results">
+      <p>No se pudo traducir "{{ store.query }}".</p>
     </div>
 
-    <div v-else-if="!store.loading" class="empty-state">
+    <!-- Estado inicial -->
+    <div v-else-if="!store.loading && !store.error" class="empty-state">
       <p>Introduce una frase chilena para obtener su significado y contexto.</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Languages, BookOpen, MessageSquare, Info, ArrowRight } from 'lucide-vue-next'
+import { ref, computed, onMounted } from 'vue'
+import { Languages, BookOpen, MessageSquare, Info, ArrowRight, Tags, GitCompare, MessageSquarePlus } from 'lucide-vue-next'
 import { useTraductorStore } from '../store/traductor'
+import { useEscenariosStore } from '../store/escenarios'
+import type { EscenarioList } from '../types'
 
 const store = useTraductorStore()
+const escenariosStore = useEscenariosStore()
+
+const query = ref('')
+const showContext = ref(false)
+const contextMode = ref<'predef' | 'custom'>('predef')
+const selectedEscenario = ref<EscenarioList | null>(null)
+const customContextText = ref('')
+const escenarios = computed(() => escenariosStore.escenarios)
+
+onMounted(() => {
+  if (escenarios.value.length === 0) {
+    escenariosStore.fetchEscenarios()
+  }
+})
+
+function onEscenarioChange() {
+  if (selectedEscenario.value) {
+    store.setContextoNombre(selectedEscenario.value.nombre)
+  } else {
+    store.setContextoId(null)
+    store.setContextoNombre(null)
+  }
+}
 
 function buscar() {
-  if (store.query.trim()) {
-    store.traducir(store.query.trim())
+  if (query.value.trim()) {
+    store.traducir(query.value.trim())
   }
+}
+
+const nivelIroniaTexto = computed(() => {
+  if (!store.resultado) return ''
+  const n = store.resultado.nivelIronia
+  if (n <= 3) return 'Bajo'
+  if (n <= 6) return 'Medio'
+  return 'Alto'
+})
+
+const nivelSarcasmoTexto = computed(() => {
+  if (!store.resultado) return ''
+  const n = store.resultado.nivelSarcasmo
+  if (n <= 3) return 'Bajo'
+  if (n <= 6) return 'Medio'
+  return 'Alto'
+})
+
+const formalidadTexto = computed(() => {
+  if (!store.resultado) return ''
+  const n = store.resultado.nivelFormalidad
+  if (n <= 2) return 'Informal'
+  if (n <= 3.5) return 'Neutral'
+  return 'Formal'
+})
+
+function nivelToBarras(nivel: number, max: number): number {
+  if (max === 3) {
+    if (nivel <= 3) return 1
+    if (nivel <= 6) return 2
+    return 3
+  }
+  return Math.min(Math.ceil((nivel / 10) * max), max)
 }
 
 function ironiaClase(barIndex: number): string {
   if (!store.resultado) return 'inactive'
-  const niveles: Record<string, number> = { Bajo: 1, Medio: 2, Alto: 3 }
-  const nivel = niveles[store.resultado.nivelIronia] || 0
-  return barIndex <= nivel ? 'active' : 'inactive'
+  const activas = nivelToBarras(store.resultado.nivelIronia, 3)
+  return barIndex <= activas ? 'active' : 'inactive'
+}
+
+function sarcasmoClase(barIndex: number): string {
+  if (!store.resultado) return 'inactive'
+  const activas = nivelToBarras(store.resultado.nivelSarcasmo, 3)
+  return barIndex <= activas ? 'active' : 'inactive'
+}
+
+function formalidadClase(barIndex: number): string {
+  if (!store.resultado) return 'inactive'
+  // Para formalidad: invertimos la logica (1=formal, 5=informal)
+  // Pero usamos nivelToBarras directamente (1=mas formal, 5=mas informal)
+  const activas = Math.round(store.resultado.nivelFormalidad)
+  return barIndex <= activas ? 'active' : 'inactive'
 }
 </script>
 
 <style scoped>
+/* Manten los mismos estilos que ya existen en el archivo actual,
+   pero agrega estos adicionales: */
+
+.context-section {
+  margin-top: 0.5rem;
+}
+
+.context-toggle {
+  background: none;
+  border: 1px dashed var(--border-color, #ccc);
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.context-toggle:hover {
+  border-color: var(--brand-accent);
+  color: var(--brand-accent);
+  background: rgba(var(--brand-accent-rgb), 0.05);
+}
+
+.context-panel {
+  margin-top: 0.75rem;
+  background: var(--brand-card-inner);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.context-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: var(--brand-accent);
+  color: #fff;
+  border-color: var(--brand-accent);
+}
+
+.context-select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #111;
+}
+
+.context-textarea {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #111;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.componentes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.componente-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.comp-token {
+  font-weight: 700;
+  color: var(--brand-dark);
+  min-width: 80px;
+}
+
+.comp-arrow {
+  color: var(--text-muted);
+}
+
+.comp-trad {
+  flex: 1;
+  color: #111;
+}
+
+.comp-tipo {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--brand-tag);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.alternativa-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.alternativa-item:last-child {
+  border-bottom: none;
+}
+
+.alt-trad {
+  font-weight: 600;
+  color: #111;
+}
+
+.alt-ctx {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.context-name {
+  font-weight: 700;
+  color: #111;
+  font-size: 1rem;
+}
+
+.context-confianza {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.confianza-valor {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--brand-accent);
+}
+
+.error-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #c0392b;
+  font-weight: 500;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.slide-enter-to,
+.slide-leave-from {
+  opacity: 1;
+  max-height: 300px;
+}
+
+/* ===== Mantener los estilos existentes del archivo original ===== */
 @keyframes viewFadeIn {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -136,7 +517,6 @@ function ironiaClase(barIndex: number): string {
   animation: viewFadeIn 0.5s ease both;
 }
 
-/* ===== Encabezado ===== */
 .view-header {
   border-left: 6px solid var(--brand-accent);
   padding-left: 1.5rem;
@@ -154,7 +534,6 @@ function ironiaClase(barIndex: number): string {
   margin-top: 0.25rem;
 }
 
-/* ===== Barra de búsqueda ===== */
 .search-bar-container {
   width: 100%;
   height: 60px;
@@ -222,7 +601,6 @@ function ironiaClase(barIndex: number): string {
   cursor: not-allowed;
 }
 
-/* ===== Estados ===== */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -242,7 +620,6 @@ function ironiaClase(barIndex: number): string {
   animation: spin 0.7s linear infinite;
 }
 
-/* ===== Transición de resultados ===== */
 .result-enter-enter-active {
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
@@ -252,18 +629,12 @@ function ironiaClase(barIndex: number): string {
   transform: translateY(16px);
 }
 
-/* ===== Layout de resultados ===== */
-.results-layout {
-  /* outer wrapper for transition v-if */
-}
-
 .results-inner {
   display: flex;
   gap: 1.5rem;
   align-items: flex-start;
 }
 
-/* ===== Tarjeta principal ===== */
 .main-card-white {
   flex: 2.5;
   background-color: #ffffff;
@@ -331,7 +702,6 @@ function ironiaClase(barIndex: number): string {
   line-height: 1.4;
 }
 
-/* ===== Columna lateral ===== */
 .side-info-column {
   flex: 1;
   display: flex;
@@ -359,7 +729,6 @@ function ironiaClase(barIndex: number): string {
   margin-bottom: 1rem;
 }
 
-/* Ironía */
 .irony-row {
   display: flex;
   justify-content: space-between;
@@ -381,23 +750,6 @@ function ironiaClase(barIndex: number): string {
 .bar.active { background-color: #6da34d; }
 .bar.inactive { background-color: #e2e8d5; }
 
-/* Tags */
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag {
-  background-color: var(--brand-tag);
-  color: #a45a41;
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-}
-
-/* Link card */
 .link-card {
   background-color: #E2E3DD;
   display: flex;
@@ -419,8 +771,6 @@ function ironiaClase(barIndex: number): string {
   margin-top: 0.25rem;
 }
 
-/* Estados vacío / sin resultados */
-.loading-state,
 .no-results,
 .empty-state {
   text-align: center;

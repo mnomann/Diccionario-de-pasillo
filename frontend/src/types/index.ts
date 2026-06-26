@@ -80,7 +80,6 @@ export interface FraseDetail {
   nivel_ironia: number
   nivel_sarcasmo: number
   ejemplo_uso: string | null
-  conversacion: Conversacion | null
   activo: boolean
   fecha_creacion: string
   fecha_actualizacion: string | null
@@ -186,4 +185,54 @@ export interface ErrorResponse {
   detalle: string
   codigo: string
   detalles?: Record<string, unknown>[]
+}
+
+// ============================================================
+// Traducciones (IA con Gemini)
+// ============================================================
+
+export interface TraduccionRequest {
+  frase: string
+  contexto_id?: number | null
+  contexto_nombre?: string | null
+  contexto_personalizado?: string | null
+}
+
+export interface ContextoDetectado {
+  id: number
+  nombre: string
+  confianza: number
+}
+
+export interface ComponenteToken {
+  token: string
+  traduccion: string
+  tipo: string
+  nivel_formalidad: number
+}
+
+export interface AnalisisCompleto {
+  tono: string
+  intencion_real: string
+  nivel_ironia: number
+  nivel_sarcasmo: number
+  nivel_formalidad_general: number
+  requiere_contexto_adicional: boolean
+}
+
+export interface TraduccionAlternativa {
+  traduccion: string
+  contexto: string
+  confianza: number
+}
+
+export interface TraduccionResponse {
+  frase_original: string
+  traduccion: string | null
+  contexto_detectado: ContextoDetectado | null
+  componentes: ComponenteToken[]
+  analisis: AnalisisCompleto | null
+  confianza: number
+  alternativas: TraduccionAlternativa[]
+  sugerencia_contextos: Array<Record<string, unknown>> | null
 }
