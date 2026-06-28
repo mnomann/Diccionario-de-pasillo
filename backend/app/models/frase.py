@@ -19,6 +19,7 @@ class Frase(Base):
     )
     frase_original: Mapped[str] = mapped_column(Text, nullable=False)
     traduccion: Mapped[str] = mapped_column(Text, nullable=False)
+    significado_literal: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     explicacion: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     tono: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     intencion_real: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

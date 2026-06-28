@@ -77,6 +77,7 @@ async def create_palabra(db: AsyncSession, data: PalabraCreate) -> Palabra:
     palabra = Palabra(
         palabra=data.palabra,
         traduccion=data.traduccion,
+        significado_literal=data.significado_literal,
         categoria=data.categoria,
         nivel_formalidad=data.nivel_formalidad,
         nivel_ironia=data.nivel_ironia,

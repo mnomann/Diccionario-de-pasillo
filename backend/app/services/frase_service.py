@@ -86,6 +86,7 @@ async def create_frase(db: AsyncSession, data: FraseCreate) -> Frase:
         escenario_id=data.escenario_id,
         frase_original=data.frase_original,
         traduccion=data.traduccion,
+        significado_literal=data.significado_literal,
         explicacion=data.explicacion,
         tono=data.tono,
         intencion_real=data.intencion_real,

@@ -9,6 +9,7 @@ export interface PalabraList {
   id: number
   palabra: string
   traduccion: string
+  significado_literal: string | null
   categoria: string
   nivel_formalidad: number
   nivel_ironia: number
@@ -20,6 +21,7 @@ export interface PalabraDetail {
   id: number
   palabra: string
   traduccion: string
+  significado_literal: string | null
   categoria: string
   nivel_formalidad: number
   nivel_ironia: number
@@ -49,6 +51,7 @@ export interface FraseList {
   id: number
   frase_original: string
   traduccion: string
+  significado_literal: string | null
   escenario: EscenarioResumen | null
   tono: string | null
   nivel_formalidad: number
@@ -73,6 +76,7 @@ export interface FraseDetail {
   escenario: EscenarioResumen | null
   frase_original: string
   traduccion: string
+  significado_literal: string | null
   explicacion: string | null
   tono: string | null
   intencion_real: string | null

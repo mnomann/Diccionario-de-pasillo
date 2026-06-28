@@ -119,6 +119,7 @@ class TestObtenerFrase:
         assert data["frase_original"] == "¿Cachai weon?"
         assert data["tono"] == "informal"
         assert "traduccion" in data
+        assert "significado_literal" in data
         assert "explicacion" in data
         assert "intencion_real" in data
         assert "nivel_formalidad" in data

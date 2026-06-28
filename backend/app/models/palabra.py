@@ -14,6 +14,7 @@ class Palabra(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     palabra: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     traduccion: Mapped[str] = mapped_column(Text, nullable=False)
+    significado_literal: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     categoria: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     nivel_formalidad: Mapped[int] = mapped_column(Integer, default=2, nullable=False)
     nivel_ironia: Mapped[int] = mapped_column(Integer, default=0, nullable=False)

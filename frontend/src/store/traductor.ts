@@ -41,7 +41,7 @@ export const useTraductorStore = defineStore('traductor', () => {
         const p = res.data[0]
         resultado.value = {
           fraseOriginal: p.palabra,
-          significadoLiteral: p.traduccion,
+          significadoLiteral: p.significado_literal || p.traduccion,
           usoComun: `"${p.ejemplo_uso || p.traduccion}"`,
           nota: `Categoría: ${p.categoria}. Nivel de formalidad: ${p.nivel_formalidad}/10.`,
           nivelIronia: determinarIronia(p.nivel_ironia),
@@ -57,8 +57,8 @@ export const useTraductorStore = defineStore('traductor', () => {
           const f = fraseRes.data[0]
           resultado.value = {
             fraseOriginal: f.frase_original,
-            significadoLiteral: f.traduccion,
-            usoComun: f.escenario?.nombre || '',
+            significadoLiteral: f.significado_literal || f.traduccion,
+            usoComun: f.traduccion,
             nota: `Tono: ${f.tono || 'neutro'}. Formalidad: ${f.nivel_formalidad}/10.`,
             nivelIronia: determinarIronia(f.nivel_ironia),
             etiquetas: [f.tono || 'neutro'].filter(Boolean),

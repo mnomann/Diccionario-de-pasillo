@@ -103,6 +103,7 @@ class TestObtenerPalabra:
         assert data["palabra"] == "Weon"
         assert data["categoria"] == "modismo"
         assert "traduccion" in data
+        assert "significado_literal" in data
         assert "nivel_formalidad" in data
         assert "nivel_ironia" in data
         assert "nivel_sarcasmo" in data

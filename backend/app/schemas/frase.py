@@ -18,6 +18,7 @@ class FraseList(BaseModel):
     id: int
     frase_original: str
     traduccion: str
+    significado_literal: Optional[str] = None
     escenario: Optional[EscenarioResumen] = None
     tono: Optional[str] = None
     nivel_formalidad: float
@@ -33,6 +34,7 @@ class FraseDetail(BaseModel):
     escenario: Optional[EscenarioResumen] = None
     frase_original: str
     traduccion: str
+    significado_literal: Optional[str] = None
     explicacion: Optional[str] = None
     tono: Optional[str] = None
     intencion_real: Optional[str] = None
@@ -51,6 +53,7 @@ class FraseCreate(BaseModel):
     escenario_id: Optional[int] = None
     frase_original: str = Field(..., min_length=1)
     traduccion: str = Field(..., min_length=1)
+    significado_literal: Optional[str] = None
     explicacion: Optional[str] = None
     tono: Optional[str] = Field(None, max_length=100)
     intencion_real: Optional[str] = None
@@ -64,6 +67,7 @@ class FraseUpdate(BaseModel):
     escenario_id: Optional[int] = None
     frase_original: Optional[str] = Field(None, min_length=1)
     traduccion: Optional[str] = Field(None, min_length=1)
+    significado_literal: Optional[str] = None
     explicacion: Optional[str] = None
     tono: Optional[str] = Field(None, max_length=100)
     intencion_real: Optional[str] = None
