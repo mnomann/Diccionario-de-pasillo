@@ -1,15 +1,23 @@
 <template>
   <div class="app-shell" :class="{ 'app-shell--landing': esLanding }">
-    <template v-if="!esLanding">
-      <SideBar :is-open="sidebarOpen" @toggle="toggleSidebar" />
-      <div v-if="sidebarOpen" class="sidebar-backdrop" @click="toggleSidebar" />
-    </template>
+    <transition name="sidebar">
+      <SideBar v-if="!esLanding" :is-open="sidebarOpen" @toggle="toggleSidebar" />
+    </transition>
+    <transition name="backdrop">
+      <div v-if="!esLanding && sidebarOpen" class="sidebar-backdrop" @click="toggleSidebar" />
+    </transition>
 
     <div class="main-container" :class="{ 'main-container--landing': esLanding }">
-      <TopBar v-if="!esLanding" @toggle-sidebar="toggleSidebar" />
+      <transition name="topbar">
+        <TopBar v-if="!esLanding" key="topbar" @toggle-sidebar="toggleSidebar" />
+      </transition>
 
       <main class="content-view" :class="{ 'content-view--landing': esLanding }">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <transition name="page" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </main>
     </div>
   </div>
@@ -69,6 +77,61 @@ function toggleSidebar() {
 .content-view--landing {
   padding: 0;
   overflow: hidden;
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: scale(1.03);
+}
+
+.topbar-enter-active,
+.topbar-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.topbar-leave-to {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.topbar-enter-from {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.sidebar-enter-active,
+.sidebar-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar-leave-to {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+.sidebar-enter-from {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+.backdrop-enter-active,
+.backdrop-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.backdrop-leave-to,
+.backdrop-enter-from {
+  opacity: 0;
 }
 
 @media (max-width: 768px) {
