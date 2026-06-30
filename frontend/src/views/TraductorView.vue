@@ -47,12 +47,26 @@
           </div>
 
           <div v-if="contextMode === 'predef'" class="context-predef">
-            <select v-model="selectedEscenario" @change="onEscenarioChange" class="context-select">
-              <option :value="null" disabled>Selecciona un contexto...</option>
-              <option v-for="esc in escenarios" :key="esc.id" :value="esc">
-                {{ esc.nombre }}
-              </option>
-            </select>
+            <p class="predef-hint">Elige un contexto social para mejorar la precisión de la traducción:</p>
+            <div class="escenario-grid">
+              <button
+                v-for="esc in escenarios"
+                :key="esc.id"
+                :class="['escenario-card', { selected: selectedEscenario?.id === esc.id }]"
+                @click="selectedEscenario = esc; onEscenarioChange()"
+              >
+                <div class="esc-icon-wrapper">
+                  <component :is="iconoComponent(esc.icono, esc.nombre)" :size="22" class="esc-icon" />
+                </div>
+                <div class="esc-body">
+                  <span class="esc-nombre">{{ esc.nombre }}</span>
+                  <span class="esc-desc">{{ esc.descripcion || 'Sin descripción' }}</span>
+                </div>
+                <span v-if="selectedEscenario?.id === esc.id" class="esc-check">
+                  <Check :size="16" />
+                </span>
+              </button>
+            </div>
           </div>
 
           <div v-if="contextMode === 'custom'" class="context-custom">
@@ -220,7 +234,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Languages, BookOpen, MessageSquare, Info, ArrowRight, Tags, GitCompare, MessageSquarePlus } from 'lucide-vue-next'
+import {
+  Languages, BookOpen, MessageSquare, Info, ArrowRight, Tags, GitCompare,
+  MessageSquarePlus, Check, Briefcase, HeartPulse, Users, Building2,
+  Home, Sparkles, Speech, MessageCircle, Camera, Star, Heart, Sun,
+} from 'lucide-vue-next'
+import type { Component } from 'vue'
 import { useTraductorStore } from '../store/traductor'
 import { useEscenariosStore } from '../store/escenarios'
 import type { EscenarioList } from '../types'
@@ -248,6 +267,26 @@ function onEscenarioChange() {
     store.setContextoId(null)
     store.setContextoNombre(null)
   }
+}
+
+const iconoComponentMap: Record<string, Component> = {
+  'briefcase': Briefcase,
+  'heart-pulse': HeartPulse,
+  'people': Users,
+  'building': Building2,
+  'house': Home,
+  'party-popper': Sparkles,
+}
+
+const defaultEscenaIcons: Component[] = [
+  MessageSquare, Speech, MessageCircle, Camera,
+  BookOpen, Star, Heart, Sun,
+]
+
+function iconoComponent(icono: string | null, nombre: string): Component {
+  if (icono && iconoComponentMap[icono]) return iconoComponentMap[icono]
+  const idx = nombre.length % defaultEscenaIcons.length
+  return defaultEscenaIcons[idx]
 }
 
 function buscar() {
@@ -372,14 +411,97 @@ function formalidadClase(barIndex: number): string {
   border-color: var(--brand-accent);
 }
 
-.context-select {
-  width: 100%;
-  padding: 0.6rem 0.8rem;
+.predef-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.escenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.5rem;
+}
+
+.escenario-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
-  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+}
+
+.escenario-card:hover {
+  border-color: var(--brand-dark);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+
+.escenario-card.selected {
+  border-color: var(--brand-accent);
+  background: rgba(74, 93, 53, 0.04);
+  box-shadow: 0 0 0 2px rgba(74, 93, 53, 0.15);
+}
+
+.esc-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--brand-sidebar);
+  flex-shrink: 0;
+}
+
+.esc-icon {
+  color: var(--brand-dark);
+}
+
+.escenario-card.selected .esc-icon-wrapper {
+  background: rgba(74, 93, 53, 0.15);
+}
+
+.esc-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.esc-nombre {
+  font-size: 0.85rem;
+  font-weight: 800;
   color: #111;
+  line-height: 1.2;
+}
+
+.esc-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.esc-check {
+  color: var(--brand-accent);
+  flex-shrink: 0;
+}
+
+@media (max-width: 500px) {
+  .escenario-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .context-textarea {
