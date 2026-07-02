@@ -12,6 +12,7 @@ from app.routers import (
     escenarios_router,
     frases_router,
     palabras_router,
+    reportes_router,
     sugerencias_router,
     traducciones_router,
     usuarios_router,
@@ -45,6 +46,7 @@ app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(palabras_router, prefix=API_PREFIX)
 app.include_router(frases_router, prefix=API_PREFIX)
 app.include_router(escenarios_router, prefix=API_PREFIX)
+app.include_router(reportes_router, prefix=API_PREFIX)
 app.include_router(sugerencias_router, prefix=API_PREFIX)
 app.include_router(traducciones_router, prefix=API_PREFIX)
 app.include_router(usuarios_router, prefix=API_PREFIX)

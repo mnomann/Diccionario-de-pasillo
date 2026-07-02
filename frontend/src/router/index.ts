@@ -14,6 +14,9 @@ const router = createRouter({
     { path: '/frases', name: 'frases', component: FrasesView },
     { path: '/escenarios', name: 'escenarios', component: EscenariosView },
     { path: '/escenarios/:eid/frases/:fid', name: 'frase-chat', component: () => import('../views/FraseChatView.vue') },
+    { path: '/reportar', name: 'reportar', component: () => import('../views/ReportFormView.vue') },
+    { path: '/reportar/:entidadTipo/:entidadId?', name: 'reportar-entidad', component: () => import('../views/ReportFormView.vue') },
+    { path: '/admin/reportes', name: 'admin-reportes', component: () => import('../views/AdminReportesView.vue') },
   ]
 })
 

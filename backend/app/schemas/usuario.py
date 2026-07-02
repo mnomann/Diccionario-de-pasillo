@@ -18,6 +18,7 @@ class UsuarioResponse(BaseModel):
     nombre: str
     email: str
     fecha_registro: datetime.datetime
+    es_admin: Optional[bool] = None
 
     model_config = {"from_attributes": True}
 
@@ -27,6 +28,7 @@ class UsuarioMe(BaseModel):
     nombre: str
     email: str
     fecha_registro: datetime.datetime
+    es_admin: Optional[bool] = None
     preferencias: Optional[dict] = None
     ultima_conexion: Optional[datetime.datetime] = None
     estadisticas: Optional[dict] = Field(

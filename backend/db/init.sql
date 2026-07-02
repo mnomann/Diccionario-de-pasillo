@@ -57,6 +57,40 @@ EXCEPTION
     WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+    CREATE TYPE reporte_tipo AS ENUM (
+        'error_contenido',    -- Error en la definicion/traduccion de una palabra/frase
+        'palabra_faltante',   -- Sugerencia de palabra que no existe en el diccionario
+        'error_ortografia',   -- Error ortografico en una entrada existente
+        'sugerencia_mejora',  -- Sugerencia para mejorar una entrada existente
+        'otro'                -- Otro tipo de reporte
+    );
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE reporte_entidad AS ENUM (
+        'palabra',
+        'frase',
+        'escenario',
+        'general'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE reporte_estado AS ENUM (
+        'pendiente',
+        'en_revision',
+        'resuelto',
+        'rechazado'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+
 -- 2. Tablas -----------------------------------------------------------------
 
 -- 2.1. Usuario
@@ -68,7 +102,8 @@ CREATE TABLE IF NOT EXISTS usuario (
     preferencias    JSONB           DEFAULT NULL,
     activo          BOOLEAN         DEFAULT TRUE,
     fecha_registro  TIMESTAMPTZ     DEFAULT NOW(),
-    ultima_conexion TIMESTAMPTZ     DEFAULT NULL,
+    ultima_conexion     TIMESTAMPTZ     DEFAULT NULL,
+    es_admin            BOOLEAN         NOT NULL DEFAULT FALSE,
 
     -- Restriccion: si existe preferencias, validar estructura basica
     CONSTRAINT preferencias_validas CHECK (
@@ -206,6 +241,28 @@ CREATE TABLE IF NOT EXISTS frase_palabra (
     UNIQUE (frase_id, palabra_id)
 );
 
+-- 2.9. Reporte
+CREATE TABLE IF NOT EXISTS reporte (
+    id                  SERIAL              PRIMARY KEY,
+    tipo                reporte_tipo        NOT NULL,
+    entidad_tipo        reporte_entidad     NOT NULL,
+    entidad_id          INTEGER             DEFAULT NULL,
+    descripcion         TEXT                NOT NULL,
+    detalle_contacto    VARCHAR(255)        DEFAULT NULL,
+    usuario_id          INTEGER             DEFAULT NULL
+                                            REFERENCES usuario(id)
+                                            ON DELETE SET NULL
+                                            ON UPDATE CASCADE,
+    estado              reporte_estado      DEFAULT 'pendiente',
+    comentario_admin    TEXT                DEFAULT NULL,
+    resuelto_por        INTEGER             DEFAULT NULL
+                                            REFERENCES usuario(id)
+                                            ON DELETE SET NULL
+                                            ON UPDATE CASCADE,
+    fecha_creacion      TIMESTAMPTZ         DEFAULT NOW(),
+    fecha_actualizacion TIMESTAMPTZ         DEFAULT NULL
+);
+
 -- 3. Indices -----------------------------------------------------------------
 
 -- 3.1. Indices para busqueda de texto completo (FTS) en palabra
@@ -287,6 +344,19 @@ CREATE INDEX IF NOT EXISTS idx_conversacion_frase
 CREATE INDEX IF NOT EXISTS idx_mensaje_conversacion
     ON mensaje (conversacion_id);
 
+-- 3.7. Indices para reportes
+CREATE INDEX IF NOT EXISTS idx_reporte_estado
+    ON reporte (estado);
+
+CREATE INDEX IF NOT EXISTS idx_reporte_tipo
+    ON reporte (tipo);
+
+CREATE INDEX IF NOT EXISTS idx_reporte_entidad
+    ON reporte (entidad_tipo, entidad_id);
+
+CREATE INDEX IF NOT EXISTS idx_reporte_usuario
+    ON reporte (usuario_id);
+
 -- 4. Funciones y Triggers ----------------------------------------------------
 
 -- 4.1. Trigger para actualizar fecha_actualizacion automaticamente
@@ -318,6 +388,12 @@ CREATE TRIGGER trg_frase_actualizacion
 
 CREATE TRIGGER trg_sugerencia_actualizacion
     BEFORE UPDATE ON sugerencia
+    FOR EACH ROW
+    WHEN (OLD.* IS DISTINCT FROM NEW.*)
+    EXECUTE FUNCTION actualizar_fecha_modificacion();
+
+CREATE TRIGGER trg_reporte_actualizacion
+    BEFORE UPDATE ON reporte
     FOR EACH ROW
     WHEN (OLD.* IS DISTINCT FROM NEW.*)
     EXECUTE FUNCTION actualizar_fecha_modificacion();
@@ -363,3 +439,13 @@ COMMENT ON COLUMN conversacion.participantes IS 'JSON array de nombres de partic
 COMMENT ON TABLE mensaje IS 'Mensajes individuales dentro de una conversacion de ejemplo';
 COMMENT ON COLUMN mensaje.es_modismo IS 'Indica si este mensaje contiene un modismo que se esta ejemplificando';
 COMMENT ON COLUMN mensaje.orden IS 'Orden del mensaje dentro de la conversacion';
+
+COMMENT ON TABLE reporte IS 'Reportes de usuarios sobre errores, palabras faltantes, ortografia y sugerencias de mejora en el diccionario';
+COMMENT ON COLUMN reporte.tipo IS 'Tipo de reporte: error_contenido, palabra_faltante, error_ortografia, sugerencia_mejora, otro';
+COMMENT ON COLUMN reporte.entidad_tipo IS 'Tipo de entidad a la que refiere el reporte: palabra, frase, escenario, general';
+COMMENT ON COLUMN reporte.entidad_id IS 'ID de la entidad especifica (NULL si entidad_tipo = general)';
+COMMENT ON COLUMN reporte.descripcion IS 'Descripcion detallada del reporte por parte del usuario';
+COMMENT ON COLUMN reporte.detalle_contacto IS 'Informacion de contacto opcional proporcionada por el usuario';
+COMMENT ON COLUMN reporte.estado IS 'Estado del reporte: pendiente, en_revision, resuelto, rechazado';
+COMMENT ON COLUMN reporte.comentario_admin IS 'Comentario del administrador al resolver o rechazar el reporte';
+COMMENT ON COLUMN reporte.resuelto_por IS 'ID del administrador que resolvio el reporte';

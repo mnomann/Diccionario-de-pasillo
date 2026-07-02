@@ -25,11 +25,15 @@
 </template>
 
 <script setup lang="ts">
-import { Languages, Book, Map, Sun, X } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { Languages, Book, Map, Sun, ShieldAlert, X } from 'lucide-vue-next'
 import type { Component } from 'vue'
+import { useAuthStore } from '../../store/auth'
 
 defineProps<{ isOpen: boolean }>()
 defineEmits<{ toggle: [] }>()
+
+const authStore = useAuthStore()
 
 interface NavItem {
   path: string
@@ -37,12 +41,18 @@ interface NavItem {
   icon: Component
 }
 
-const navItems: NavItem[] = [
-  { path: '/traductor', label: 'Traductor', icon: Languages },
-  { path: '/diccionario', label: 'Diccionario', icon: Book },
-  { path: '/escenarios', label: 'Escenarios', icon: Map },
-  { path: '/frases', label: 'Frases Frecuentes', icon: Sun },
-]
+const navItems = computed<NavItem[]>(() => {
+  const items: NavItem[] = [
+    { path: '/traductor', label: 'Traductor', icon: Languages },
+    { path: '/diccionario', label: 'Diccionario', icon: Book },
+    { path: '/escenarios', label: 'Escenarios', icon: Map },
+    { path: '/frases', label: 'Frases Frecuentes', icon: Sun },
+  ]
+  if (authStore.isAdmin) {
+    items.push({ path: '/admin/reportes', label: 'Panel de Reportes', icon: ShieldAlert })
+  }
+  return items
+})
 </script>
 
 <style scoped>

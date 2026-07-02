@@ -8,22 +8,34 @@
     </div>
 
     <div class="nav-actions">
-      <button class="action-btn">
+      <button class="action-btn" @click="abrirModal">
         <UserCircle :size="20" />
-        CUENTA
+        {{ authStore.isAuthenticated ? `Hola, ${authStore.usuario?.nombre ?? ''}` : 'CUENTA' }}
       </button>
       <button class="action-btn">
         <Settings :size="20" />
         AJUSTES
       </button>
     </div>
+
+    <AuthModal :is-open="authModalOpen" @close="authModalOpen = false" />
   </header>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { UserCircle, Settings, Menu } from 'lucide-vue-next'
+import { useAuthStore } from '../../store/auth'
+import AuthModal from '../auth/AuthModal.vue'
 
 defineEmits<{ 'toggle-sidebar': [] }>()
+
+const authStore = useAuthStore()
+const authModalOpen = ref(false)
+
+function abrirModal() {
+  authModalOpen.value = true
+}
 </script>
 
 <style scoped>

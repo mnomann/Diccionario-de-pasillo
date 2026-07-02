@@ -48,7 +48,7 @@
         <h3>¿FALTA ALGO?</h3>
         <p>Ayúdanos a completar el diccionario con nuevas palabras.</p>
       </div>
-      <button class="suggest-btn">
+      <button class="suggest-btn" @click="irAReportar">
         <Send :size="18" class="send-icon" />
         SUGERIR PALABRA
       </button>
@@ -58,10 +58,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { Search, Send } from 'lucide-vue-next'
 import { usePalabrasStore } from '../store/palabras'
 
 const store = usePalabrasStore()
+const router = useRouter()
 
 const categoriaActiva = ref('TODO')
 const textoBusqueda = ref('')
@@ -83,6 +85,10 @@ function buscar() {
     categoria: categoriaActiva.value === 'TODO' ? undefined : categoriaActiva.value.toLowerCase(),
     buscar: textoBusqueda.value || undefined,
   })
+}
+
+function irAReportar() {
+  router.push('/reportar/palabra')
 }
 </script>
 

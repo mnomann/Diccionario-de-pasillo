@@ -55,6 +55,7 @@ async def obtener_perfil(
         nombre=usuario.nombre,
         email=usuario.email,
         fecha_registro=usuario.fecha_registro,
+        es_admin=usuario.es_admin,
         preferencias=usuario.preferencias,
         ultima_conexion=usuario.ultima_conexion,
         estadisticas=estadisticas,

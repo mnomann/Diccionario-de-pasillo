@@ -138,6 +138,7 @@ export interface UsuarioMe {
   preferencias: Record<string, string> | null
   ultima_conexion: string | null
   estadisticas: Record<string, unknown> | null
+  es_admin?: boolean
 }
 
 export interface LoginRequest {
@@ -185,6 +186,50 @@ export interface ErrorResponse {
   detalle: string
   codigo: string
   detalles?: Record<string, unknown>[]
+}
+
+// ============================================================
+// Reportes
+// ============================================================
+
+export type ReporteTipo = 'error_contenido' | 'palabra_faltante' | 'error_ortografia' | 'sugerencia_mejora' | 'otro'
+export type ReporteEntidad = 'palabra' | 'frase' | 'escenario' | 'general'
+export type ReporteEstado = 'pendiente' | 'en_revision' | 'resuelto' | 'rechazado'
+
+export interface ReporteCreate {
+  tipo: ReporteTipo
+  entidad_tipo: ReporteEntidad
+  entidad_id?: number | null
+  descripcion: string
+  detalle_contacto?: string | null
+}
+
+export interface ReporteResponse {
+  id: number
+  tipo: ReporteTipo
+  entidad_tipo: ReporteEntidad
+  entidad_id: number | null
+  descripcion: string
+  detalle_contacto: string | null
+  estado: ReporteEstado
+  fecha_creacion: string
+}
+
+export interface ReporteDetail extends ReporteResponse {
+  usuario: UsuarioResponse | null
+  comentario_admin: string | null
+  resuelto_por: number | null
+  fecha_actualizacion: string | null
+}
+
+export interface ReporteUpdate {
+  estado?: ReporteEstado
+  comentario_admin?: string
+}
+
+export interface PaginatedReportes {
+  data: ReporteDetail[]
+  paginacion: Paginacion
 }
 
 // ============================================================

@@ -3,7 +3,7 @@
 -- Modismos chilenos autenticos, culturalmente precisos
 
 -- 0. Limpieza (para re-ejecucion segura) ------------------------------------
-TRUNCATE TABLE frase_palabra, sugerencia, frase, palabra, escenario, usuario RESTART IDENTITY CASCADE;
+TRUNCATE TABLE frase_palabra, sugerencia, reporte, frase, palabra, escenario, usuario RESTART IDENTITY CASCADE;
 
 -- 1. Escenarios -------------------------------------------------------------
 INSERT INTO escenario (nombre, descripcion, icono) VALUES
@@ -387,12 +387,13 @@ INSERT INTO frase_palabra (frase_id, palabra_id, relevancia) VALUES
     (14, 12, 5);
 
 -- 5. Usuario de prueba ------------------------------------------------------
-INSERT INTO usuario (nombre, email, contrasena_hash, preferencias, activo)
+INSERT INTO usuario (nombre, email, contrasena_hash, preferencias, activo, es_admin)
 VALUES (
     'Usuario Prueba',
     'test@desenreda.cl',
-    '$2b$12$LJ3m4ys3Lk0TSwHnbfOMiOXPm1Qlq5Gz5Y5p5Y5p5Y5p5Y5p5Y5',
+    '$2b$12$GmmIGPEEREcEE5VwBMmBv.QqCw..iNmI7CU82.De8xDbJ97OAZ/Ym',
     '{"tono_explicacion": "neutro", "nivel_detalle": "medio"}'::jsonb,
+    TRUE,
     TRUE
 );
 
@@ -416,14 +417,50 @@ INSERT INTO sugerencia (usuario_id, tipo, contenido, estado, usuario_email) VALU
     (NULL,
      'escenario',
      '{"nombre": "Supermercado", "descripcion": "Situaciones cotidianas en el supermercado donde ocurren interacciones con personal y otros clientes", "icono": "cart"}',
-     'aprobado',
-     'colaborador@correo.cl');
+      'aprobado',
+      'colaborador@correo.cl');
 
--- 7. Verificacion de datos insertados ---------------------------------------
+-- 7. Reportes de ejemplo ----------------------------------------------------
+INSERT INTO reporte (tipo, entidad_tipo, entidad_id, descripcion, detalle_contacto, usuario_id, estado, comentario_admin, resuelto_por) VALUES
+    -- Reporte de error de contenido en palabra "weon"
+    ('error_contenido',
+     'palabra',
+     1,
+     'La traduccion de "weon" no menciona que tambien se usa como saludo entre amigos, no solo como "tonto" o "amigo". Sugiero agregar el uso como saludo: "Oye weon, como estai?"',
+     NULL,
+     1,
+     'en_revision',
+     NULL,
+     NULL),
+
+    -- Reporte de palabra faltante (usuario anonimo)
+    ('palabra_faltante',
+     'general',
+     NULL,
+     'Falta la palabra "pachorra" que se usa para describir a alguien tranquilo o que se toma las cosas con calma. Es común en el sur de Chile.',
+     'colaborador@correo.cl',
+     NULL,
+     'pendiente',
+     NULL,
+     NULL),
+
+    -- Reporte de ortografia (resuelto)
+    ('error_ortografia',
+     'frase',
+     1,
+     'En la frase "Cachai lo que te digo?" la palabra "cachai" debería llevar tilde: "cachái" segun las reglas de acentuacion de palabras agudas terminadas en vocal.',
+     NULL,
+     NULL,
+    'resuelto',
+     'La palabra "cachai" se escribe sin tilde segun la RAE para extranjerismos adaptados. Se mantiene la ortografia actual.',
+     1);
+
+-- 8. Verificacion de datos insertados ---------------------------------------
 -- Descomentar para verificar:
 -- SELECT 'Escenarios' AS tabla, COUNT(*) FROM escenario
 -- UNION ALL SELECT 'Palabras', COUNT(*) FROM palabra
 -- UNION ALL SELECT 'Frases', COUNT(*) FROM frase
 -- UNION ALL SELECT 'Frase-Palabra', COUNT(*) FROM frase_palabra
 -- UNION ALL SELECT 'Usuarios', COUNT(*) FROM usuario
--- UNION ALL SELECT 'Sugerencias', COUNT(*) FROM sugerencia;
+-- UNION ALL SELECT 'Sugerencias', COUNT(*) FROM sugerencia
+-- UNION ALL SELECT 'Reportes', COUNT(*) FROM reporte;
