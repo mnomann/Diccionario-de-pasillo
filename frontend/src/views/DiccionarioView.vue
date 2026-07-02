@@ -62,6 +62,14 @@ import { useRouter } from 'vue-router'
 import { Search, Send } from 'lucide-vue-next'
 import { usePalabrasStore } from '../store/palabras'
 
+const CATEGORIA_MAP: Record<string, string | undefined> = {
+  'TODO': undefined,
+  'Modismos': 'modismo',
+  'Muletillas': 'muletilla',
+  'Jerga': 'jerga',
+  'Abreviaciones': 'abreviacion',
+}
+
 const store = usePalabrasStore()
 const router = useRouter()
 
@@ -75,14 +83,14 @@ onMounted(() => {
 function filtrar(cat: string) {
   categoriaActiva.value = cat
   store.fetchPalabras({
-    categoria: cat === 'TODO' ? undefined : cat.toLowerCase(),
+    categoria: CATEGORIA_MAP[cat],
     buscar: textoBusqueda.value || undefined,
   })
 }
 
 function buscar() {
   store.fetchPalabras({
-    categoria: categoriaActiva.value === 'TODO' ? undefined : categoriaActiva.value.toLowerCase(),
+    categoria: CATEGORIA_MAP[categoriaActiva.value],
     buscar: textoBusqueda.value || undefined,
   })
 }

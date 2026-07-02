@@ -4,7 +4,7 @@
       <button class="hamburger" @click="$emit('toggle-sidebar')">
         <Menu :size="20" />
       </button>
-      <div class="logo-text">Desenreda</div>
+      <router-link to="/" class="logo-text">Desenreda</router-link>
     </div>
 
     <div class="nav-actions">
@@ -97,6 +97,13 @@ function abrirModal() {
   font-style: italic;
   border-bottom: 2px solid var(--brand-sidebar-deeper);
   padding-bottom: 2px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.logo-text:hover {
+  opacity: 0.7;
 }
 
 .nav-actions {

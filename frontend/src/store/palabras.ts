@@ -15,7 +15,7 @@ const MOCK_PALABRAS: PalabraList[] = [
 export const usePalabrasStore = defineStore('palabras', () => {
   const palabras = ref<PalabraList[]>(MOCK_PALABRAS)
   const palabraActual = ref<PalabraDetail | null>(null)
-  const categorias = ref<string[]>(['TODO', 'AMIGOS', 'TRABAJO', 'CALLE', 'COMIDA'])
+  const categorias = ref<string[]>(['TODO', 'Modismos', 'Muletillas', 'Jerga', 'Abreviaciones'])
   const loading = ref(false)
   const error = ref<string | null>(null)
   const usandoMock = ref(true)
@@ -36,10 +36,19 @@ export const usePalabrasStore = defineStore('palabras', () => {
       palabras.value = result.data
       usandoMock.value = false
     } catch {
-      if (!params?.buscar && !params?.categoria) {
-        palabras.value = MOCK_PALABRAS
-        usandoMock.value = true
+      let filtradas = MOCK_PALABRAS
+      if (params?.categoria) {
+        filtradas = filtradas.filter(p => p.categoria === params.categoria)
       }
+      if (params?.buscar) {
+        const q = params.buscar.toLowerCase()
+        filtradas = filtradas.filter(p =>
+          p.palabra.toLowerCase().includes(q) ||
+          p.traduccion.toLowerCase().includes(q)
+        )
+      }
+      palabras.value = filtradas
+      usandoMock.value = true
     } finally {
       loading.value = false
     }

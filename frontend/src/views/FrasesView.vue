@@ -6,10 +6,27 @@
         <p class="subtitle">Aprende y practica las frases más usadas en Chile.</p>
       </div>
       <div class="header-actions">
-        <button class="btn-filter">
-          <Filter :size="16" />
-          Filtrar
-        </button>
+        <div class="filter-wrapper">
+          <button class="btn-filter" @click="mostrarFiltros = !mostrarFiltros">
+            <Filter :size="16" />
+            Filtrar
+            <span v-if="filtroActivo" class="filter-active-dot" />
+          </button>
+          <transition name="filter-drop">
+            <div v-if="mostrarFiltros" class="filter-dropdown">
+              <button
+                :class="['filter-option', { active: filtroActivo === null }]"
+                @click="filtroActivo = null; mostrarFiltros = false"
+              >Todas</button>
+              <button
+                v-for="tag in tagsDisponibles"
+                :key="tag"
+                :class="['filter-option', { active: filtroActivo === tag }]"
+                @click="filtroActivo = tag; mostrarFiltros = false"
+              >{{ tag }}</button>
+            </div>
+          </transition>
+        </div>
         <button class="btn-new">
           <Plus :size="16" />
           Nueva Frase
@@ -24,7 +41,7 @@
 
     <TransitionGroup v-else name="card-enter" tag="div" class="frases-grid">
       <article
-        v-for="(frase, idx) in store.frases"
+        v-for="(frase, idx) in frasesFiltradas"
         :key="frase.id"
         :class="['frase-card', frase.type === 'wide' ? 'wide-card' : 'normal-card']"
         :style="{ '--card-delay': idx * 0.04 + 's' }"
@@ -37,10 +54,7 @@
             <span class="placeholder-text">{{ frase.word }}</span>
           </div>
           <div class="card-content">
-            <div class="card-top-row">
-              <h2 class="word-title">{{ frase.word }}</h2>
-              <Volume2 :size="18" class="speaker-icon" />
-            </div>
+            <h2 class="word-title">{{ frase.word }}</h2>
             <p class="word-meaning">{{ frase.meaning }}</p>
 
             <div v-if="frase.tags" class="tags-row">
@@ -52,11 +66,8 @@
         <template v-else>
           <div class="wide-content-wrapper">
             <div class="wide-header">
-              <div>
-                <h2 class="word-title">{{ frase.word }}</h2>
-                <p class="word-meaning">{{ frase.meaning }}</p>
-              </div>
-              <Volume2 :size="20" class="speaker-icon" />
+              <h2 class="word-title">{{ frase.word }}</h2>
+              <p class="word-meaning">{{ frase.meaning }}</p>
             </div>
 
             <div class="example-quote">
@@ -78,11 +89,25 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { Filter, Plus, Volume2, MessageSquare } from 'lucide-vue-next'
+import { ref, computed, onMounted } from 'vue'
+import { Filter, Plus, MessageSquare } from 'lucide-vue-next'
 import { useFrasesStore } from '../store/frases'
 
 const store = useFrasesStore()
+
+const mostrarFiltros = ref(false)
+const filtroActivo = ref<string | null>(null)
+
+const tagsDisponibles = computed(() => {
+  const tags = new Set<string>()
+  store.frases.forEach(f => f.tags?.forEach(t => tags.add(t)))
+  return Array.from(tags).sort()
+})
+
+const frasesFiltradas = computed(() => {
+  if (!filtroActivo.value) return store.frases
+  return store.frases.filter(f => f.tags?.includes(filtroActivo.value as string))
+})
 
 onMounted(() => {
   store.fetchFrases()
@@ -162,6 +187,68 @@ onMounted(() => {
 .btn-filter:hover {
   background-color: rgba(0,0,0,0.04);
   border-color: #bbb;
+}
+
+.filter-wrapper {
+  position: relative;
+}
+
+.filter-active-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  display: inline-block;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: #fff;
+  border: 1px solid var(--border-color, #e2e5dc);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  padding: 0.35rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filter-option {
+  background: none;
+  border: none;
+  padding: 0.55rem 0.8rem;
+  text-align: left;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.filter-option:hover {
+  background: var(--brand-card-inner);
+}
+
+.filter-option.active {
+  background: var(--brand-accent);
+  color: #fff;
+}
+
+.filter-drop-enter-active,
+.filter-drop-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.filter-drop-enter-from,
+.filter-drop-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 .btn-new {
@@ -288,28 +375,11 @@ onMounted(() => {
   flex-grow: 1;
 }
 
-.card-top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
 .word-title {
   font-size: 1.3rem;
   font-weight: 800;
   color: #111;
-}
-
-.speaker-icon {
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color 0.15s;
-  flex-shrink: 0;
-}
-
-.speaker-icon:hover {
-  color: var(--brand-dark);
+  margin-bottom: 0.5rem;
 }
 
 .word-meaning {
@@ -350,9 +420,6 @@ onMounted(() => {
 }
 
 .wide-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   margin-bottom: 1.5rem;
 }
 
