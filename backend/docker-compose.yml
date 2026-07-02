@@ -1,9 +1,7 @@
-# =============================================================================
-# DESENREDA - Docker Compose
-# Backend: Python + FastAPI + Uvicorn | Frontend: Vue 3 + Vite
+# -----------------------------------------------------------------------------
+# DESENREDA - Docker Compose para desarrollo del Backend
 # 
 # Uso: docker compose up --build
-# =============================================================================
 
 services:
   # ---------------------------------------------------------------------------
@@ -36,24 +34,6 @@ services:
       timeout: 5s
       start_period: 15s
       retries: 3
-
-  # ---------------------------------------------------------------------------
-  # Frontend: Vue 3 + Vite + TypeScript
-  # ---------------------------------------------------------------------------
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    container_name: desenreda-frontend
-    restart: unless-stopped
-    ports:
-      - "5173:80"
-    environment:
-      - VITE_API_URL=http://backend:8000/api/v1
-    depends_on:
-      - backend
-    networks:
-      - desenreda-net
 
   # ---------------------------------------------------------------------------
   # Base de datos: PostgreSQL 16

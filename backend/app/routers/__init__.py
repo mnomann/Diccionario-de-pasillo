@@ -4,6 +4,8 @@ from app.routers.frases import router as frases_router
 from app.routers.escenarios import router as escenarios_router
 from app.routers.sugerencias import router as sugerencias_router
 from app.routers.usuarios import router as usuarios_router
+from app.routers.traducciones import router as traducciones_router
+from app.routers.reportes import router as reportes_router
 
 __all__ = [
     "auth_router",
@@ -12,4 +14,6 @@ __all__ = [
     "escenarios_router",
     "sugerencias_router",
     "usuarios_router",
+    "traducciones_router",
+    "reportes_router",
 ]

@@ -18,6 +18,9 @@ class Usuario(Base):
     nombre: Mapped[str] = mapped_column(String(150), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     contrasena_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    es_admin: Mapped[Optional[bool]] = mapped_column(
+        Boolean, default=False, server_default="false", nullable=True
+    )
     preferencias: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True, default={})
     activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     fecha_registro: Mapped[datetime.datetime] = mapped_column(

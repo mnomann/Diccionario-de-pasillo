@@ -34,6 +34,13 @@ from app.schemas.sugerencia import (
     SugerenciaResponse,
     PaginatedSugerenciaResponse,
 )
+from app.schemas.reporte import (
+    PaginatedReporteResponse,
+    ReporteCreate,
+    ReporteDetail,
+    ReporteResponse,
+    ReporteUpdate,
+)
 
 __all__ = [
     "ErrorResponse",
@@ -64,4 +71,9 @@ __all__ = [
     "SugerenciaList",
     "SugerenciaDetail",
     "PaginatedSugerenciaResponse",
+    "ReporteCreate",
+    "ReporteResponse",
+    "ReporteDetail",
+    "ReporteUpdate",
+    "PaginatedReporteResponse",
 ]

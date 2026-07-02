@@ -1,10 +1,10 @@
 import datetime
 from typing import Any, Optional
 
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,18 +12,17 @@ from app.config import settings
 from app.database import get_db
 from app.models.usuario import Usuario
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security_scheme = HTTPBearer()
 
 
 def hash_password(password: str) -> str:
     """Genera el hash bcrypt de una contrasena."""
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12)).decode("utf-8")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
     """Verifica una contrasena contra su hash."""
-    return pwd_context.verify(password, password_hash)
+    return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
 
 
 def create_access_token(data: dict[str, Any]) -> tuple[str, int]:
@@ -59,12 +58,13 @@ async def get_current_user(
 ) -> Usuario:
     """Dependency que valida el JWT y retorna el usuario autenticado."""
     payload = decode_access_token(credentials.credentials)
-    user_id: Optional[int] = payload.get("sub")
-    if user_id is None:
+    raw_sub = payload.get("sub")
+    if raw_sub is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token invalido: sin identificador de usuario",
         )
+    user_id = int(raw_sub)
 
     result = await db.execute(select(Usuario).where(Usuario.id == user_id))
     user = result.scalar_one_or_none()

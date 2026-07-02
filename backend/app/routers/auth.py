@@ -81,7 +81,7 @@ async def login(
     usuario.ultima_conexion = datetime.datetime.now(datetime.timezone.utc)
     await db.flush()
 
-    token, expires_in = create_access_token({"sub": usuario.id})
+    token, expires_in = create_access_token({"sub": str(usuario.id)})  # str para compatibilidad con python-jose
 
     return LoginResponse(
         token=token,
