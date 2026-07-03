@@ -4,7 +4,7 @@
     <div class="progress-bar" ref="progressBar" />
 
     <!-- SLIDE 1: Hero -->
-    <section class="slide" id="slide-1">
+    <section class="slide" id="slide-1" :style="slideStyle">
       <div class="slide-bg" />
       <div class="slide-blob slide-blob--1" />
       <div class="slide-blob slide-blob--2" />
@@ -23,7 +23,7 @@
     </section>
 
     <!-- SLIDE 2: ¿Qué es? -->
-    <section class="slide slide--light" id="slide-2" ref="queEsRef">
+    <section class="slide slide--light" id="slide-2" ref="queEsRef" :style="slideStyle">
       <div class="slide-content slide-content--left" :class="{ visible: queEsVisible }">
         <span class="section-num">01</span>
         <h2>¿Qué es Desenreda?</h2>
@@ -50,7 +50,7 @@
     </section>
 
     <!-- SLIDE 3: ¿A quién va dirigido? -->
-    <section class="slide" id="slide-3" ref="paraQuienRef">
+    <section class="slide" id="slide-3" ref="paraQuienRef" :style="slideStyle">
       <div class="slide-bg" />
       <div class="slide-blob slide-blob--3" />
       <div class="slide-content" :class="{ visible: paraQuienVisible }">
@@ -118,7 +118,7 @@
     </section>
 
     <!-- SLIDE 5: ¿Cómo se usa? -->
-    <section class="slide" id="slide-5" ref="comoUsarRef">
+    <section class="slide" id="slide-5" ref="comoUsarRef" :style="slideStyle">
       <div class="slide-bg slide-bg--alt" />
       <div class="slide-blob slide-blob--2" />
       <div class="slide-content" :class="{ visible: comoUsarVisible }">
@@ -144,7 +144,7 @@
     </section>
 
     <!-- SLIDE 6: CTA -->
-    <section class="slide" id="slide-cta" ref="ctaRef">
+    <section class="slide" id="slide-cta" ref="ctaRef" :style="slideStyle">
       <div class="slide-bg slide-bg--cta" />
       <div class="slide-content cta-content" :class="{ visible: ctaVisible }">
         <h2>¿Listo para desenredar el chileno?</h2>
@@ -160,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import {
   ChevronDown, MessageSquareText, BookOpen, Map,
   Brain, Globe, Heart, Search, Languages, Lightbulb,
@@ -181,6 +181,15 @@ const comoUsarVisible = ref(false)
 const ctaVisible = ref(false)
 
 const progressBar = ref<HTMLElement | null>(null)
+
+const slideHeight = ref(0)
+
+const slideStyle = computed(() => {
+  if (slideHeight.value === 0) return {}
+  return { height: slideHeight.value + 'px' }
+})
+
+let slide4ResizeObserver: ResizeObserver | null = null
 
 const observers: IntersectionObserver[] = []
 
@@ -217,12 +226,23 @@ onMounted(() => {
   observar(ctaRef.value, ctaVisible, 0.3)
   const el = document.querySelector('.landing')
   if (el) el.addEventListener('scroll', onScroll, { passive: true })
+
+  function measureSlide4() {
+    if (queHaceRef.value) {
+      slideHeight.value = queHaceRef.value.offsetHeight
+    }
+  }
+  nextTick(measureSlide4)
+
+  slide4ResizeObserver = new ResizeObserver(measureSlide4)
+  if (queHaceRef.value) slide4ResizeObserver.observe(queHaceRef.value)
 })
 
 onUnmounted(() => {
   observers.forEach(o => o.disconnect())
   const el = document.querySelector('.landing')
   if (el) el.removeEventListener('scroll', onScroll)
+  if (slide4ResizeObserver) slide4ResizeObserver.disconnect()
 })
 </script>
 
@@ -247,38 +267,25 @@ onUnmounted(() => {
   background-repeat: repeat; background-size: 256px 256px;
 }
 
-.progress-bar {
-  position: fixed; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, #8a9f70, #c2d4a4);
-  transform-origin: left; transform: scaleX(0);
-  z-index: 10000; will-change: transform;
-}
+.progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #8a9f70, #c2d4a4); transform-origin: left; transform: scaleX(0); z-index: 10000; will-change: transform; transition: background 0.5s ease; }
 
-/* ===== Sticky slides ===== */
+/* ===== Slides ===== */
 .slide {
-  position: sticky;
-  top: 0;
-  height: 100vh;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  padding: 4rem 0 8rem 0;
+  overflow-y: auto;
 }
+#slide-4 { height: auto; }
 
-/* ===== Dark slides (hero) ===== */
-.slide {
-  background: linear-gradient(135deg, #3a4a32 0%, #5a7050 40%, #4a5a3a 100%);
-}
-
-.slide--light {
-  background: #f4f6ed;
-}
-
+/* ===== Slide backgrounds solidos ===== */
+.slide { background: #4a5a3a; }
 #slide-2, #slide-4 { background: #f4f6ed; }
-#slide-3 { background: linear-gradient(135deg, #2d3a28 0%, #4a6040 50%, #3a5030 100%); }
-#slide-5 { background: linear-gradient(135deg, #3a4530 0%, #556a48 50%, #4a5a3a 100%); }
-#slide-cta { background: linear-gradient(135deg, #2d3322 0%, #4a5a3a 60%, #3a4a32 100%); }
+#slide-3 { background: #3a5030; }
+#slide-5 { background: #4a5a3a; }
+#slide-cta { background: #3a4a32; }
 
 /* Blobs */
 .slide-blob {
@@ -315,7 +322,7 @@ onUnmounted(() => {
 /* ===== Slide content ===== */
 .slide-content {
   position: relative; z-index: 1;
-  text-align: center; padding: 2rem;
+  text-align: center; padding: 2rem 2rem 4rem;
   max-width: 900px; width: 100%;
   color: #fff;
 }
@@ -336,11 +343,7 @@ onUnmounted(() => {
   transform: translateY(0);
 }
 
-/* Override: first slide always visible */
-#slide-1 .slide-content {
-  opacity: 1;
-  transform: none;
-}
+
 
 /* ===== Hero typography ===== */
 .slide h1 {
@@ -589,10 +592,8 @@ onUnmounted(() => {
 /* ===== Responsive ===== */
 @media (max-width: 900px) {
   .slide {
-    position: relative;
-    height: auto;
-    min-height: 100vh;
-    padding: 3rem 0;
+    min-height: auto;
+    padding: 4rem 0 6rem 0;
   }
 
   .slide-content {
@@ -631,5 +632,13 @@ onUnmounted(() => {
   .feature-icon :deep(svg) { width: 18px; height: 18px; }
   .usage-icon { width: 36px; height: 36px; }
   .usage-icon :deep(svg) { width: 16px; height: 16px; }
+}
+
+/* ===== CTA centrado vertical ===== */
+#slide-cta {
+  padding: 2rem 0;
+}
+#slide-cta .slide-content {
+  padding: 0;
 }
 </style>
