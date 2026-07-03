@@ -15,6 +15,7 @@
           Traduce el lenguaje informal, la ironía y los modismos chilenos a un
           significado claro y directo.
         </p>
+        <router-link to="/traductor" class="hero-cta">Ir al Traductor</router-link>
         <div class="scroll-hint">
           <span>Desliza para conocer más</span>
           <ChevronDown :size="24" class="bounce" />
@@ -640,5 +641,23 @@ onUnmounted(() => {
 }
 #slide-cta .slide-content {
   padding: 0;
+}
+
+/* ===== Hero CTA ===== */
+.hero-cta {
+  display: inline-flex; align-items: center;
+  background: #fff;
+  color: #2d3322;
+  font-size: 1.1rem; font-weight: 700;
+  padding: 0.875rem 2.5rem;
+  border-radius: 999px;
+  text-decoration: none;
+  margin-top: 2rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.hero-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
 }
 </style>
