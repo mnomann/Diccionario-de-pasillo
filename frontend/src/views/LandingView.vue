@@ -6,8 +6,8 @@
     <!-- SLIDE 1: Hero -->
     <section class="slide" id="slide-1" :style="slideStyle">
       <div class="slide-bg" />
-      <div class="slide-blob slide-blob--1" />
-      <div class="slide-blob slide-blob--2" />
+      <div class="slide-blob slide-blob--1" ref="blob1" />
+      <div class="slide-blob slide-blob--2" ref="blob2" />
       <div class="slide-content" ref="heroRef">
         <span class="slide-badge">DESENREDA</span>
         <h1>Guía del español chileno</h1>
@@ -16,6 +16,7 @@
           significado claro y directo.
         </p>
         <router-link to="/traductor" class="hero-cta">Ir al Traductor</router-link>
+        <p class="hero-or">o</p>
         <div class="scroll-hint">
           <span>Desliza para conocer más</span>
           <ChevronDown :size="24" class="bounce" />
@@ -53,7 +54,7 @@
     <!-- SLIDE 3: ¿A quién va dirigido? -->
     <section class="slide" id="slide-3" ref="paraQuienRef" :style="slideStyle">
       <div class="slide-bg" />
-      <div class="slide-blob slide-blob--3" />
+      <div class="slide-blob slide-blob--3" ref="blob3" />
       <div class="slide-content" :class="{ visible: paraQuienVisible }">
         <span class="section-num section-num--light">02</span>
         <h2 class="slide-title--light">¿A quién va dirigido?</h2>
@@ -174,6 +175,9 @@ const queHaceRef = ref<HTMLElement | null>(null)
 const comoUsarRef = ref<HTMLElement | null>(null)
 const ctaRef = ref<HTMLElement | null>(null)
 const heroRef = ref<HTMLElement | null>(null)
+const blob1 = ref<HTMLElement | null>(null)
+const blob2 = ref<HTMLElement | null>(null)
+const blob3 = ref<HTMLElement | null>(null)
 
 const queEsVisible = ref(false)
 const paraQuienVisible = ref(false)
@@ -217,6 +221,11 @@ function onScroll() {
     const pct = total > 0 ? (el.scrollTop / total) * 100 : 0
     progressBar.value.style.transform = `scaleX(${pct / 100})`
   }
+  const el = document.querySelector('.landing')
+  if (!el) return
+  if (blob1.value) { const y = (el as HTMLElement).scrollTop * 0.15; blob1.value.style.transform = `translateY(${-y}px)`; }
+  if (blob2.value) { const y = (el as HTMLElement).scrollTop * 0.1; blob2.value.style.transform = `translateY(${y}px)`; }
+  if (blob3.value) { const y = (el as HTMLElement).scrollTop * 0.12; blob3.value.style.transform = `translateY(${-y}px)`; }
 }
 
 onMounted(() => {
@@ -344,7 +353,8 @@ onUnmounted(() => {
   transform: translateY(0);
 }
 
-
+@keyframes heroZoomIn { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
+#slide-1 .slide-content { animation: heroZoomIn 1.2s ease-out both; }
 
 /* ===== Hero typography ===== */
 .slide h1 {
@@ -385,7 +395,7 @@ onUnmounted(() => {
 .scroll-hint {
   margin-top: 4rem;
   display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-  font-size: 0.85rem; font-weight: 500; opacity: 0.5;
+  font-size: 0.85rem; font-weight: 500; opacity: 0.7;
 }
 
 @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
@@ -421,13 +431,13 @@ onUnmounted(() => {
   text-align: center; font-weight: 600; font-size: 0.95rem;
   color: #2d3322;
   box-shadow: 0 2px 8px rgba(45,51,34,0.04);
-  opacity: 0; transform: translateY(30px) scale(0.95);
+  opacity: 0; transform: translateY(30px) scale(0.8); filter: blur(4px);
   transition: opacity 0.5s ease var(--d,0s), transform 0.5s ease var(--d,0s),
-              box-shadow 0.3s, border-color 0.3s;
+              box-shadow 0.3s, border-color 0.3s, filter 0.5s ease var(--d,0s);
 }
 
 .slide-content.visible .feature-item {
-  opacity: 1; transform: translateY(0) scale(1);
+  opacity: 1; transform: translateY(0) scale(1); filter: blur(0);
 }
 
 .feature-item:hover {
@@ -455,13 +465,13 @@ onUnmounted(() => {
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px; padding: 2rem;
   position: relative; overflow: hidden;
-  opacity: 0; transform: translateY(40px) scale(0.9);
+  opacity: 0; transform: translateY(40px) scale(0.9); filter: blur(3px);
   transition: opacity 0.5s ease var(--d,0s), transform 0.5s ease var(--d,0s),
-              box-shadow 0.3s, border-color 0.3s;
+              box-shadow 0.3s, border-color 0.3s, filter 0.5s ease var(--d,0s);
 }
 
 .slide-content.visible .persona-card {
-  opacity: 1; transform: translateY(0) scale(1);
+  opacity: 1; transform: translateY(0) scale(1); filter: blur(0);
 }
 
 .persona-card:hover {
@@ -495,12 +505,12 @@ onUnmounted(() => {
   border: 1px solid rgba(45,51,34,0.06); border-radius: 14px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(45,51,34,0.03);
-  opacity: 0; transform: translateX(-40px);
+  opacity: 0; transform: translateX(-40px); filter: blur(3px);
   transition: opacity 0.5s ease var(--d,0s), transform 0.5s ease var(--d,0s),
-              box-shadow 0.3s, border-color 0.3s;
+              box-shadow 0.3s, border-color 0.3s, filter 0.5s ease var(--d,0s);
 }
 
-.slide-content.visible .step { opacity: 1; transform: translateX(0); }
+.slide-content.visible .step { opacity: 1; transform: translateX(0); filter: blur(0); }
 
 .step:hover {
   box-shadow: 0 6px 20px rgba(45,51,34,0.07);
@@ -529,11 +539,11 @@ onUnmounted(() => {
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px; padding: 1.25rem 1.5rem;
   width: 100%; max-width: 500px;
-  opacity: 0; transform: scale(0.9) translateY(20px);
-  transition: opacity 0.5s ease var(--d,0s), transform 0.5s ease var(--d,0s);
+  opacity: 0; transform: scale(0.9) translateY(20px); filter: blur(3px);
+  transition: opacity 0.5s ease var(--d,0s), transform 0.5s ease var(--d,0s), filter 0.5s ease var(--d,0s);
 }
 
-.slide-content.visible .usage-step { opacity: 1; transform: scale(1) translateY(0); }
+.slide-content.visible .usage-step { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 
 .usage-step:hover {
   background: rgba(255,255,255,0.12);
@@ -617,10 +627,10 @@ onUnmounted(() => {
   .step { padding: 1rem; }
   .usage-step { padding: 0.875rem 1rem; }
 
-  .feature-item { opacity: 1 !important; transform: none !important; }
-  .persona-card { opacity: 1 !important; transform: none !important; }
-  .step { opacity: 1 !important; transform: none !important; }
-  .usage-step { opacity: 1 !important; transform: none !important; }
+  .feature-item { opacity: 1 !important; transform: none !important; filter: none !important; }
+  .persona-card { opacity: 1 !important; transform: none !important; filter: none !important; }
+  .step { opacity: 1 !important; transform: none !important; filter: none !important; }
+  .usage-step { opacity: 1 !important; transform: none !important; filter: none !important; }
   .usage-arrow { opacity: 1 !important; }
 
   .section-num { margin-bottom: 0.25rem; }
@@ -659,5 +669,15 @@ onUnmounted(() => {
 .hero-cta:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+}
+
+.hero-or {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.65;
+  color: #fff;
+  text-align: center;
 }
 </style>
